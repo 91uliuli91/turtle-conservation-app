@@ -41,30 +41,31 @@ useEffect(() => {
     }
 }, [isOnline, pendingSyncs, syncPendingEvents]);
 
+// En tu WizardForm.tsx, actualiza handleSave:
 const handleSave = async () => {
-setIsSaving(true);
-setSaveStatus('saving');
+  setIsSaving(true);
+  setSaveStatus('saving');
 
-try {
+  try {
     if (isOnline) {
-    // Guardar online (simulado)
-    console.log('Guardando online:', eventData);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setSaveStatus('saved');
-    alert('✅ Evento guardado en línea exitosamente!');
+      // Guardar online
+      console.log('Guardando online:', eventData);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSaveStatus('saved');
+      alert('✅ Evento guardado en línea exitosamente!');
     } else {
-    // Guardar offline
-    const id = await saveEventOffline(eventData);
-    setSaveStatus('saved');
-    alert(`✅ Evento guardado offline (ID: ${id}). Se sincronizará automáticamente cuando haya conexión.`);
+      // Guardar offline
+      const id = await saveEventOffline(eventData);
+      setSaveStatus('saved');
+      alert(`✅ Evento guardado offline (ID: ${id}). Se sincronizará automáticamente cuando haya conexión.`);
     }
-} catch (error) {
+  } catch (error) {
     console.error('Error guardando evento:', error);
     setSaveStatus('error');
-    alert('❌ Error guardando el evento. Por favor intenta nuevamente.');
-} finally {
+    alert(`❌ Error guardando el evento: ${error.message}. Por favor intenta nuevamente.`);
+  } finally {
     setIsSaving(false);
-}
+  }
 };
 
 const renderCurrentStep = () => {
