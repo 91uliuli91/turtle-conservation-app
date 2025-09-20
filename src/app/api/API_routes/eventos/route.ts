@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
       // Obtener evento específico por ID
       const result = await query(`
         SELECT e.*, 
-               c.nombre as campamento_nombre,
-               t.marca_principal as tortuga_marca,
-               p.nombre_completo as personal_nombre
+              c.nombre as campamento_nombre,
+              t.marca_principal as tortuga_marca,
+              p.nombre_completo as personal_nombre
         FROM Eventos e
         LEFT JOIN Campamentos c ON e.campamento_id = c.id
         LEFT JOIN Tortugas t ON e.tortuga_id = t.id
