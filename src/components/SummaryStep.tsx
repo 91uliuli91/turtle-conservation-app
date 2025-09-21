@@ -14,8 +14,8 @@ const names: { [key: string]: string } = {
     'arqueo': 'Arqueo',
     'intento': 'Intento',
     'anidacion': 'Anidación'
-};
-return names[type] || type;
+    };
+        return names[type] || type;
 };
 
 return (
