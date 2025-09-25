@@ -122,44 +122,97 @@ switch (currentStep) {
 };
 
 return (
-<div className="min-h-screen bg-black text-white p-4 relative">
-    {/* Indicador de estado de conexión */}
-    <div className={`fixed top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold z-50 ${
-    isOnline ? 'bg-green-600' : 'bg-red-600'
-    }`}>
-    {isOnline ? '🟢 En línea' : '🔴 Offline'}
-    {pendingSyncs > 0 && ` (${pendingSyncs} pendientes)`}
+  <div className="w-full bg-white text-gray-900 rounded-lg">
+    {/* Header con indicador de conexión */}
+    <div className="border-b border-gray-200 px-6 py-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Registro de Evento - Paso {currentStep} de 5
+        </h2>
+        
+        {/* Indicador de estado de conexión */}
+        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+          isOnline 
+            ? 'bg-green-100 text-green-800 border border-green-200' 
+            : 'bg-red-100 text-red-800 border border-red-200'
+        }`}>
+          {isOnline ? '🟢 En línea' : '🔴 Offline'}
+          {pendingSyncs > 0 && ` (${pendingSyncs} pendientes)`}
+        </div>
+      </div>
+
+      {/* Barra de progreso */}
+      <div className="mt-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-gray-600">Progreso</span>
+          <span className="text-sm text-gray-500">{currentStep}/5</span>
+        </div>
+        
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / 5) * 100}%` }}
+          ></div>
+        </div>
+        
+        {/* Indicadores de pasos */}
+        <div className="flex justify-between mt-3">
+          {[
+            { step: 1, label: 'Tipo' },
+            { step: 2, label: 'Ubicación' },
+            { step: 3, label: 'Detalles' },
+            { step: 4, label: 'Fotos' },
+            { step: 5, label: 'Resumen' }
+          ].map(({ step, label }) => (
+            <div key={step} className="flex flex-col items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-200 ${
+                currentStep >= step 
+                  ? 'bg-blue-600 text-white' 
+                  : currentStep === step - 1
+                  ? 'bg-blue-100 text-blue-600 border-2 border-blue-600'
+                  : 'bg-gray-200 text-gray-500'
+              }`}>
+                {currentStep > step ? '✓' : step}
+              </div>
+              <span className={`text-xs mt-1 ${
+                currentStep >= step ? 'text-blue-600 font-medium' : 'text-gray-400'
+              }`}>
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
 
-    <div className="max-w-md mx-auto">
-    {/* Indicador de progreso */}
-    <div className="flex justify-between mb-8">
-        {[1, 2, 3, 4, 5].map(step => (
-        <div
-            key={step}
-            className={`w-8 h-8 rounded-full flex items-center justify-center ${
-            currentStep >= step ? 'bg-green-600' : 'bg-gray-600'
-            }`}
-        >
-            {step}
-        </div>
-        ))}
+    {/* Contenido del paso actual */}
+    <div className="px-6 py-8 min-h-[500px]">
+      {renderCurrentStep()}
     </div>
 
-    {renderCurrentStep()}
-
-    {/* Estado del guardado */}
-    {saveStatus === 'saving' && (
-        <div className="fixed bottom-4 left-4 bg-blue-600 px-3 py-2 rounded">
-        Guardando...
-        </div>
+    {/* Footer con estados */}
+    {saveStatus !== 'idle' && (
+      <div className="border-t border-gray-200 px-6 py-4">
+        {saveStatus === 'saving' && (
+          <div className="flex items-center text-blue-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+            Guardando evento...
+          </div>
+        )}
+        {saveStatus === 'saved' && (
+          <div className="flex items-center text-green-600">
+            <i className="fas fa-check-circle mr-2"></i>
+            ✅ Evento guardado {isOnline ? 'en línea' : 'offline'} exitosamente
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div className="flex items-center text-red-600">
+            <i className="fas fa-exclamation-circle mr-2"></i>
+            ❌ Error al guardar el evento
+          </div>
+        )}
+      </div>
     )}
-    {saveStatus === 'saved' && (
-        <div className="fixed bottom-4 left-4 bg-green-600 px-3 py-2 rounded">
-        ✅ Guardado {isOnline ? 'en línea' : 'offline'}
-        </div>
-    )}
-    </div>
-</div>
+  </div>
 );
 }
