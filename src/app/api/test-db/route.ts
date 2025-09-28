@@ -1,3 +1,4 @@
+// src/app/api/test-db/route.js
 import { NextRequest, NextResponse } from 'next/server';
 import { 
   checkDatabaseConnection, 

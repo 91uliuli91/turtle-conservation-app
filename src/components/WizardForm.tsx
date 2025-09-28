@@ -120,10 +120,11 @@ export default function WizardForm() {
   };
 
   return (
-      <div className="w-full h-full bg-gradient-to-br from-[#0a0f0f] to-[#0f1a1a] text-[#f0fdf4] rounded-2xl shadow-2xl border border-[#1a3d2c] overflow-hidden">
+      <div className="w-full h-full bg-gradient-to-br from-[#0a0f0f] to-[#0f1a1a] text-[#f0fdf4]  shadow-2xl border border-[#1a3d2c] overflow-hidden">
       {/* Header con indicador de conexión */}
       <div className="bg-gradient-to-r from-[#1a3d2c] to-[#0f2a1f] px-8 py-6 text-[#f0fdf4] border-b border-[#2dbf78]/30">
         <div className="flex justify-between items-center mb-4">
+          
           <div>
             <h2 className="text-2xl font-bold">Registro de Evento</h2>
             <p className="text-[#2dbf78] text-sm mt-1">Complete la información del evento en 5 pasos</p>
@@ -135,6 +136,7 @@ export default function WizardForm() {
               ? 'bg-[#2dbf78]/20 text-[#2dbf78] border border-[#2dbf78]/40' 
               : 'bg-red-500/20 text-red-400 border border-red-500/40'
           }`}>
+            
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-[#2dbf78]' : 'bg-red-400'}`}></div>
               {isOnline ? 'En línea' : 'Offline'}
@@ -145,8 +147,17 @@ export default function WizardForm() {
               )}
             </div>
           </div>
-        </div>
-
+          
+        </div>    
+        {/* Botón de regreso */}
+        <button 
+          onClick={() => window.history.back()} // Regresa a la página anterior en el historial
+          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+        >
+          {/* Icono de flecha hacia atrás */}
+          <i className="fas fa-arrow-left text-gray-600"></i>
+          <span className="text-gray-700">Volver</span>
+        </button>
         {/* Barra de progreso y pasos */}
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">

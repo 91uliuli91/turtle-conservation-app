@@ -39,15 +39,15 @@ return (
             {eventData.location.lat.toFixed(6)}, {eventData.location.lon.toFixed(6)}
         </span>
         </div>
-
         <div className="flex justify-between">
         <span className="text-gray-400">Fecha/Hora:</span>
-        <span className="font-semibold">{new Date().toLocaleString()}</span>
+        <span className="font-semibold">
+            {eventData.date ? new Date(eventData.date).toLocaleString() : new Date().toLocaleString()}
+        </span>
         </div>
     </div>
     </div>
-
-    {eventData.type === 'anidacion' && eventData.details.numeroHuevos !== undefined && (
+    {eventData.type === 'anidacion' && eventData.details?.numeroHuevos && (
     <div className="bg-gray-800 rounded-lg p-4 mb-6">
         <h3 className="text-lg font-semibold mb-3 border-b border-gray-600 pb-2">
         Detalles de Anidación

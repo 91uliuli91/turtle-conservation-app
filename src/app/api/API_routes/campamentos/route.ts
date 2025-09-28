@@ -1,3 +1,4 @@
+// src/app/api/API_routes/campamentos/route.js
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 
