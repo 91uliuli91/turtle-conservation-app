@@ -1,270 +1,289 @@
 // src/components/WizardForm.tsx
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import EventTypeSelector from './EventTypeSelector';
-import LocationPicker from './LocationPicker';
-import EventDetails from './EventDetails';
-import PhotoStep from './PhotoStep';
-import SummaryStep from './SummaryStep';
-import { useOffline } from '@/hooks/useOffline';
+import { useState, useEffect } from "react"
+import EventTypeSelector from "./EventTypeSelector"
+import LocationPicker from "./LocationPicker"
+import EventDetails from "./EventDetails"
+import PhotoStep from "./PhotoStep"
+import SummaryStep from "./SummaryStep"
+
+// Mock hook for offline functionality
+const useOffline = () => ({
+  isOnline: true,
+  pendingSyncs: 0,
+  saveEventOffline: async (data: any) => {
+    console.log("Saving offline:", data)
+    return Math.random().toString(36).substr(2, 9)
+  },
+  syncPendingEvents: async () => console.log("Syncing events"),
+})
 
 export default function WizardForm() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1)
   const [eventData, setEventData] = useState({
-    type: '',
+    type: "",
     location: { lat: 0, lon: 0 },
     details: {},
     photos: [] as string[],
-    observations: ''
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    observations: "",
+  })
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
 
-  const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline();
+  const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline()
 
-  const nextStep = () => setCurrentStep(prev => prev + 1);
-  const prevStep = () => setCurrentStep(prev => prev - 1);
+  const nextStep = () => setCurrentStep((prev) => prev + 1)
+  const prevStep = () => setCurrentStep((prev) => prev - 1)
 
   const updateEventData = (field: string, value: any) => {
-    setEventData(prev => ({ ...prev, [field]: value }));
-  };
-  
-  // Sincronizar automáticamente cuando hay conexión
-useEffect(() => {
-  let syncInterval: NodeJS.Timeout;
-
-  if (isOnline && pendingSyncs > 0) {
-    // Intentar sincronizar cada 30 segundos mientras haya eventos pendientes
-    syncInterval = setInterval(() => {
-      syncPendingEvents().catch(console.error);
-    }, 30000);
+    setEventData((prev) => ({ ...prev, [field]: value }))
   }
 
-  return () => {
-    if (syncInterval) clearInterval(syncInterval);
-  };
-}, [isOnline, pendingSyncs, syncPendingEvents]);
+  // Sincronizar automáticamente cuando hay conexión
+  useEffect(() => {
+    let syncInterval: NodeJS.Timeout
+
+    if (isOnline && pendingSyncs > 0) {
+      // Intentar sincronizar cada 30 segundos mientras haya eventos pendientes
+      syncInterval = setInterval(() => {
+        syncPendingEvents().catch(console.error)
+      }, 30000)
+    }
+
+    return () => {
+      if (syncInterval) clearInterval(syncInterval)
+    }
+  }, [isOnline, pendingSyncs, syncPendingEvents])
 
   const handleSave = async () => {
-    setIsSaving(true);
-    setSaveStatus('saving');
+    setIsSaving(true)
+    setSaveStatus("saving")
 
     try {
       if (isOnline) {
         // Guardar online
-        console.log('Guardando online:', eventData);
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        setSaveStatus('saved');
-        alert('✅ Evento guardado en línea exitosamente!');
+        console.log("Guardando online:", eventData)
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        setSaveStatus("saved")
+        alert("✅ Evento guardado en línea exitosamente!")
       } else {
         // Guardar offline
-        const id = await saveEventOffline(eventData);
-        setSaveStatus('saved');
-        alert(`✅ Evento guardado offline (ID: ${id}). Se sincronizará automáticamente cuando haya conexión.`);
+        const id = await saveEventOffline(eventData)
+        setSaveStatus("saved")
+        alert(`✅ Evento guardado offline (ID: ${id}). Se sincronizará automáticamente cuando haya conexión.`)
       }
-    } catch (error) {
-      console.error('Error guardando evento:', error);
-      setSaveStatus('error');
-      alert(`❌ Error guardando el evento: ${error.message}. Por favor intenta nuevamente.`);
+    } catch (error: any) {
+      console.error("Error guardando evento:", error)
+      setSaveStatus("error")
+      alert(`❌ Error guardando el evento: ${error.message}. Por favor intenta nuevamente.`)
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
-  
+  }
+
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
         return (
           <EventTypeSelector
             onSelect={(type) => {
-              updateEventData('type', type);
-              nextStep();
+              updateEventData("type", type)
+              nextStep()
             }}
           />
-        );
+        )
       case 2:
         return (
           <LocationPicker
             onLocationConfirm={(lat, lon) => {
-              updateEventData('location', { lat, lon });
-              nextStep();
+              updateEventData("location", { lat, lon })
+              nextStep()
             }}
             onBack={prevStep}
           />
-        );
+        )
       case 3:
         return (
           <EventDetails
             eventType={eventData.type}
-            onDetailsChange={(details) => updateEventData('details', details)}
+            onDetailsChange={(details) => updateEventData("details", details)}
             onBack={prevStep}
             onNext={nextStep}
           />
-        );
+        )
       case 4:
         return (
           <PhotoStep
-            onPhotosChange={(photos) => updateEventData('photos', photos)}
-            onObservationsChange={(observations) => updateEventData('observations', observations)}
+            onPhotosChange={(photos) => updateEventData("photos", photos)}
+            onObservationsChange={(observations) => updateEventData("observations", observations)}
             onBack={prevStep}
             onNext={nextStep}
           />
-        );
+        )
       case 5:
-        return (
-          <SummaryStep
-            eventData={eventData}
-            onBack={prevStep}
-            onSave={handleSave}
-            isSaving={isSaving}
-          />
-        );
+        return <SummaryStep eventData={eventData} onBack={prevStep} onSave={handleSave} isSaving={isSaving} />
       default:
-        return <div>Paso no válido</div>;
+        return <div>Paso no válido</div>
     }
-  };
-  
+  }
+
   return (
-      <div className="w-full h-full bg-gradient-to-br from-[#0a0f0f] to-[#0f1a1a] text-[#f0fdf4]  shadow-2xl border border-[#1a3d2c] overflow-hidden">
-      {/* Header con indicador de conexión */}
-      <div className="bg-gradient-to-r from-[#1a3d2c] to-[#0f2a1f] px-8 py-6 text-[#f0fdf4] border-b border-[#2dbf78]/30">
-        <div className="flex justify-between items-center mb-4">
-          
-          <div>
-            <h2 className="text-2xl font-bold">Registro de Evento</h2>
-            <p className="text-[#2dbf78] text-sm mt-1">Complete la información del evento en 5 pasos</p>
-          </div>
-          
-          {/* Indicador de estado de conexión */}
-          <div className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm ${
-            isOnline 
-              ? 'bg-[#2dbf78]/20 text-[#2dbf78] border border-[#2dbf78]/40' 
-              : 'bg-red-500/20 text-red-400 border border-red-500/40'
-          }`}>
-            
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-[#2dbf78]' : 'bg-red-400'}`}></div>
-              {isOnline ? 'En línea' : 'Offline'}
-              {pendingSyncs > 0 && (
-                <span className="bg-white/10 px-2 py-1 rounded-full text-xs">
-                  {pendingSyncs} pendiente{pendingSyncs !== 1 ? 's' : ''}
+    <div className="min-h-screen bg-background">
+      <div className="p-6 sm:p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 mb-8">
+            <div className="flex justify-between items-start mb-8">
+              <div className="space-y-4">
+                <h1 className="text-4xl sm:text-5xl font-light text-balance tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Registro de Evento
+                </h1>
+                <p className="text-muted-foreground text-xl text-pretty leading-relaxed">
+                  Complete la información del evento de conservación
+                </p>
+              </div>
+
+              <div
+                className={`px-4 py-3 rounded-2xl text-sm font-medium border transition-all duration-300 backdrop-blur-sm ${
+                  isOnline
+                    ? "bg-success/10 text-success border-success/30 shadow-lg shadow-success/5"
+                    : "bg-destructive/10 text-destructive border-destructive/30 shadow-lg shadow-destructive/5"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-3 h-3 rounded-full ${isOnline ? "bg-success" : "bg-destructive"} animate-pulse`}
+                  ></div>
+                  <span className="font-semibold">{isOnline ? "En línea" : "Offline"}</span>
+                  {pendingSyncs > 0 && (
+                    <span className="bg-muted px-3 py-1 rounded-full text-xs font-medium">{pendingSyncs}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-muted-foreground tracking-wide">
+                  PASO {currentStep} DE 5
                 </span>
-              )}
+                <span className="text-sm text-muted-foreground font-medium">
+                  {Math.round((currentStep / 5) * 100)}% completado
+                </span>
+              </div>
+
+              {/* Enhanced progress bar with gradient */}
+              <div className="relative">
+                <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="gradient-purple-blue h-2 rounded-full transition-all duration-1000 ease-out shadow-lg"
+                    style={{ width: `${(currentStep / 5) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Modern step indicators */}
+              <div className="flex justify-between items-center">
+                {[
+                  { step: 1, label: "Tipo", icon: "🐢" },
+                  { step: 2, label: "Ubicación", icon: "📍" },
+                  { step: 3, label: "Detalles", icon: "📝" },
+                  { step: 4, label: "Fotos", icon: "📸" },
+                  { step: 5, label: "Resumen", icon: "✅" },
+                ].map(({ step, label, icon }) => (
+                  <div key={step} className="flex flex-col items-center space-y-3 animate-fadeInUp">
+                    <div
+                      className={`relative w-12 h-12 rounded-2xl flex items-center justify-center text-lg transition-all duration-500 ${
+                        currentStep >= step
+                          ? "gradient-purple-blue text-white shadow-lg shadow-primary/25 scale-110"
+                          : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80"
+                      }`}
+                    >
+                      {currentStep >= step ? (
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      ) : (
+                        <span>{icon}</span>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs font-semibold transition-colors duration-300 tracking-wide ${
+                        currentStep >= step ? "text-primary" : "text-muted-foreground"
+                      }`}
+                    >
+                      {label.toUpperCase()}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          
-        </div>    
-        {/* Botón de regreso */}
-        <button 
-          onClick={() => window.history.back()} // Regresa a la página anterior en el historial
-          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
-        >
-          {/* Icono de flecha hacia atrás */}
-          <i className="fas fa-arrow-left text-gray-600"></i>
-          <span className="text-gray-700">Volver</span>
-        </button>
-        {/* Barra de progreso y pasos */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-[#2dbf78]">Progreso del formulario</span>
-            <span className="text-sm font-semibold bg-[#2dbf78]/20 px-3 py-1 rounded-full text-[#2dbf78]">
-              Paso {currentStep} de 5
-            </span>
-          </div>
-          
-          {/* Barra de progreso principal */}
-          <div className="w-full bg-[#1a3d2c] rounded-full h-3 mb-6">
-            <div 
-              className="bg-[#2dbf78] h-3 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${(currentStep / 5) * 100}%` }}
-            ></div>
-          </div>
-          
-          {/* Indicadores de pasos */}
-          <div className="flex justify-between relative">
-            {/* Línea de conexión */}
-            <div className="absolute top-4 left-0 right-0 h-0.5 bg-[#1a3d2c] -z-10"></div>
-            <div 
-              className="absolute top-4 left-0 h-0.5 bg-[#2dbf78] transition-all duration-500 ease-out -z-10"
-              style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
-            ></div>
-            
-            {[
-              { step: 1, label: 'Tipo de Evento', icon: '📋' },
-              { step: 2, label: 'Ubicación', icon: '📍' },
-              { step: 3, label: 'Detalles', icon: '✏️' },
-              { step: 4, label: 'Multimedia', icon: '📷' },
-              { step: 5, label: 'Resumen', icon: '✅' }
-            ].map(({ step, label, icon }) => (
-              <div key={step} className="flex flex-col items-center relative">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-semibold transition-all duration-300 shadow-lg ${
-                  currentStep >= step 
-                    ? 'bg-[#2dbf78] text-[#0a0f0f] scale-110 shadow-[#2dbf78]/40' 
-                    : currentStep === step - 1
-                    ? 'bg-[#1a3d2c] text-[#2dbf78] border-2 border-[#2dbf78] shadow-lg'
-                    : 'bg-[#1a3d2c] text-[#2dbf78]/60'
-                }`}>
-                  {currentStep > step ? '✓' : icon}
-                </div>
-                <span className={`text-xs mt-2 font-medium text-center max-w-[80px] ${
-                  currentStep >= step ? 'text-[#2dbf78] font-semibold' : 'text-[#2dbf78]/70'
-                }`}>
-                  {label}
-                </span>
-                <span className={`absolute -top-2 -right-2 w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold ${
-                  step === currentStep ? 'bg-yellow-400 text-[#0a0f0f] animate-pulse' : 'hidden'
-                }`}>
-                  !
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
-      {/* Contenido del paso actual */}
-      <div className="px-8 py-8 min-h-[500px] bg-[#0a0f0f]/50 backdrop-blur-sm">
-        <div className="bg-[#0f1a1a] rounded-2xl shadow-lg border border-[#1a3d2c] p-6 min-h-[400px]">
-          {renderCurrentStep()}
+      <div className="px-6 pb-12 sm:px-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="animate-fadeInUp">{renderCurrentStep()}</div>
         </div>
       </div>
 
-      {/* Footer con estados */}
-      {saveStatus !== 'idle' && (
-        <div className="border-t border-[#1a3d2c] bg-[#0a0f0f] px-8 py-4">
-          <div className={`flex items-center justify-center py-2 px-4 rounded-lg ${
-            saveStatus === 'saving' ? 'bg-[#1a3d2c] border border-[#2dbf78]/30' :
-            saveStatus === 'saved' ? 'bg-[#1a3d2c] border border-[#2dbf78]/50' :
-            'bg-red-900/20 border border-red-500/30'
-          }`}>
-            {saveStatus === 'saving' && (
-              <div className="flex items-center text-[#2dbf78]">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#2dbf78] mr-3"></div>
-                <span className="font-medium">Guardando evento...</span>
+      {saveStatus !== "idle" && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/50 z-50">
+          <div className="px-6 py-6">
+            <div className="max-w-2xl mx-auto">
+              <div
+                className={`flex items-center justify-center py-6 px-8 rounded-3xl transition-all duration-500 animate-scaleIn ${
+                  saveStatus === "saving"
+                    ? "bg-muted/30 border border-border/50"
+                    : saveStatus === "saved"
+                      ? "bg-success/10 border border-success/30 shadow-lg shadow-success/5"
+                      : "bg-destructive/10 border border-destructive/30 shadow-lg shadow-destructive/5"
+                }`}
+              >
+                {saveStatus === "saving" && (
+                  <div className="flex items-center text-foreground">
+                    <div className="animate-spin rounded-full h-6 w-6 border-3 border-primary/20 border-t-primary mr-4"></div>
+                    <span className="font-semibold text-lg">Guardando evento...</span>
+                  </div>
+                )}
+                {saveStatus === "saved" && (
+                  <div className="flex items-center text-success">
+                    <div className="w-6 h-6 rounded-full bg-success flex items-center justify-center mr-4">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <span className="font-semibold text-lg">Evento guardado exitosamente</span>
+                  </div>
+                )}
+                {saveStatus === "error" && (
+                  <div className="flex items-center text-destructive">
+                    <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center mr-4">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <span className="font-semibold text-lg">Error al guardar el evento</span>
+                  </div>
+                )}
               </div>
-            )}
-            {saveStatus === 'saved' && (
-              <div className="flex items-center text-[#2dbf78]">
-                <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">
-                  Evento guardado {isOnline ? 'en línea' : 'offline'} exitosamente
-                </span>
-              </div>
-            )}
-            {saveStatus === 'error' && (
-              <div className="flex items-center text-red-400">
-                <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">Error al guardar el evento</span>
-              </div>
-            )}
+            </div>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }

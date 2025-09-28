@@ -1,52 +1,48 @@
 // src/components/PhotoStep.tsx
-//Este componente gestiona tanto la captura de fotos como las observaciones de un evento y permite la navegación entre pasos del formulario. 
-'use client';
+//Este componente gestiona tanto la captura de fotos como las observaciones de un evento y permite la navegación entre pasos del formulario.
+"use client"
 
-import { useState } from 'react';
+import { useState } from "react"
 
 // Definición de las propiedades que se pasan al componente PhotoStep
 interface PhotoStepProps {
-  onPhotosChange: (photos: string[]) => void; // Función que se llama para actualizar las fotos en el paso anterior
-  onObservationsChange: (observations: string) => void; // Función que se llama para actualizar las observaciones
-  onBack: () => void; // Función para retroceder al paso anterior
-  onNext: () => void; // Función para avanzar al siguiente paso
+  onPhotosChange: (photos: string[]) => void // Función que se llama para actualizar las fotos en el paso anterior
+  onObservationsChange: (observations: string) => void // Función que se llama para actualizar las observaciones
+  onBack: () => void // Función para retroceder al paso anterior
+  onNext: () => void // Función para avanzar al siguiente paso
 }
 
 export default function PhotoStep({ onPhotosChange, onObservationsChange, onBack, onNext }: PhotoStepProps) {
   // Estado local para almacenar las fotos y observaciones
-  const [photos, setPhotos] = useState<string[]>([]); // Array que guarda las URLs de las fotos
-  const [observations, setObservations] = useState(''); // Texto que guarda las observaciones del evento
+  const [photos, setPhotos] = useState<string[]>([]) // Array que guarda las URLs de las fotos
+  const [observations, setObservations] = useState("") // Texto que guarda las observaciones del evento
 
   // Función que se llama cuando se toma una nueva foto
   const handleTakePhoto = () => {
     // Genera una URL aleatoria de una foto (en este caso, usando picsum.photos)
-    const newPhoto = `https://picsum.photos/200/300?random=${photos.length + 1}`;
-    const newPhotos = [...photos, newPhoto]; // Se añade la nueva foto al array
-    setPhotos(newPhotos); // Actualiza el estado de las fotos
-    onPhotosChange(newPhotos); // Llama a la función proporcionada para actualizar las fotos en el formulario
-  };
+    const newPhoto = `https://picsum.photos/200/300?random=${photos.length + 1}`
+    const newPhotos = [...photos, newPhoto] // Se añade la nueva foto al array
+    setPhotos(newPhotos) // Actualiza el estado de las fotos
+    onPhotosChange(newPhotos) // Llama a la función proporcionada para actualizar las fotos en el formulario
+  }
 
   // Función para eliminar una foto
   const handleRemovePhoto = (index: number) => {
-    const newPhotos = photos.filter((_, i) => i !== index); // Filtra la foto que se quiere eliminar
-    setPhotos(newPhotos); // Actualiza el estado con las fotos restantes
-    onPhotosChange(newPhotos); // Actualiza las fotos en el formulario
-  };
+    const newPhotos = photos.filter((_, i) => i !== index) // Filtra la foto que se quiere eliminar
+    setPhotos(newPhotos) // Actualiza el estado con las fotos restantes
+    onPhotosChange(newPhotos) // Actualiza las fotos en el formulario
+  }
 
   return (
     <div className="flex flex-col px-6 py-8 h-full animate-fadeIn">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl font-light text-gray-100 mb-2">
-          Fotos y Observaciones
-        </h2>
+        <h2 className="text-2xl font-light text-gray-100 mb-2">Fotos y Observaciones</h2>
       </div>
 
       {/* Sección para tomar fotos */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-lg font-light text-gray-300">
-            Fotos ({photos.length})
-          </h3>
+          <h3 className="text-lg font-light text-gray-300">Fotos ({photos.length})</h3>
           <button
             onClick={handleTakePhoto} // Llama a handleTakePhoto cuando el usuario hace clic
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 
@@ -98,8 +94,8 @@ export default function PhotoStep({ onPhotosChange, onObservationsChange, onBack
         <textarea
           value={observations} // Muestra las observaciones ingresadas
           onChange={(e) => {
-            setObservations(e.target.value); // Actualiza el estado local de observaciones
-            onObservationsChange(e.target.value); // Llama a la función para actualizar las observaciones en el formulario
+            setObservations(e.target.value) // Actualiza el estado local de observaciones
+            onObservationsChange(e.target.value) // Llama a la función para actualizar las observaciones en el formulario
           }}
           placeholder="Escribe observaciones relevantes sobre el evento..."
           className="w-full h-32 p-4 bg-slate-800/50 border border-slate-700 
@@ -128,5 +124,5 @@ export default function PhotoStep({ onPhotosChange, onObservationsChange, onBack
         </button>
       </div>
     </div>
-  );
-};
+  )
+}

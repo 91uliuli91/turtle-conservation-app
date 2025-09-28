@@ -1,226 +1,109 @@
-'use client';
-
-import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  IconButton
-} from '@mui/material';
-import {
-  AddCircleOutline,
-  MapOutlined,
-  AnalyticsOutlined,
-  Pets,
-  EggOutlined,
-  CalendarToday
-} from '@mui/icons-material';
-import { styled, alpha } from '@mui/material/styles';
-import Link from 'next/link';
+// page.tsx - Versión actualizada con tema oscuro y estilo unificado
+"use client"
+import Link from "next/link"
+import { PlusCircleIcon, MapIcon, ChartBarIcon, UserIcon, EyeIcon, CalendarIcon } from "@heroicons/react/24/outline"
 
 export default function TurtleTrackDashboard() {
-  // Componentes estilizados
-  const DashboardContainer = styled(Box)(({ theme }) => ({
-    minHeight: '100vh',
-    background: 'linear-gradient(135deg, #4B8F8C 0%, #0F2A1F 100%)',
-    padding: theme.spacing(4),
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  }));
-
-  const GradientCard = styled(Card)(({ theme }) => ({
-    background: alpha(theme.palette.common.white, 0.1),
-    backdropFilter: 'blur(10px)',
-    borderRadius: theme.spacing(2),
-    border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-    transition: 'all 0.3s ease',
-    cursor: 'pointer',
-    textDecoration: 'none',
-    height: '100%',
-    '&:hover': {
-      transform: 'translateY(-8px)',
-      background: alpha(theme.palette.common.white, 0.15),
-      boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)',
-    },
-  }));
-
-  const ActivityCard = styled(Card)(({ theme }) => ({
-    background: alpha(theme.palette.common.white, 0.1),
-    backdropFilter: 'blur(10px)',
-    borderRadius: theme.spacing(2),
-    border: `1px solid ${alpha(theme.palette.common.white, 0.1)}`,
-    padding: theme.spacing(3),
-    marginTop: theme.spacing(4),
-    width: '100%',
-    maxWidth: 400,
-  }));
-
   const activityData = [
-    { icon: <Pets />, title: 'Avistamiento de Tortuga Verde', time: 'Hace 2 horas', location: 'Playa Norte' },
-    { icon: <EggOutlined />, title: 'Liberación de crías exitosa', time: 'Ayer, 16:30', location: 'Playa Sur' },
-    { icon: <CalendarToday />, title: 'Nuevo evento programado', time: 'Mañana, 08:00', location: 'Santuario' },
-  ];
+    {
+      icon: <EyeIcon className="w-5 h-5" />,
+      title: "Avistamiento de Tortuga Verde",
+      time: "Hace 2 horas",
+      location: "Playa Norte",
+    },
+    {
+      icon: <div className="w-5 h-5 rounded-full bg-gradient-to-r from-purple-400 to-blue-400"></div>,
+      title: "Liberación de crías exitosa",
+      time: "Ayer, 16:30",
+      location: "Playa Sur",
+    },
+    {
+      icon: <CalendarIcon className="w-5 h-5" />,
+      title: "Nuevo evento programado",
+      time: "Mañana, 08:00",
+      location: "Santuario",
+    },
+  ]
 
   return (
-    <DashboardContainer>
-      {/* Header simple con solo el avatar de usuario */}
-      <Box sx={{ 
-        position: 'absolute', 
-        top: theme => theme.spacing(4), 
-        right: theme => theme.spacing(4),
-        display: 'flex',
-        alignItems: 'center',
-        gap: 2
-      }}>
-        <Avatar 
-          sx={{ 
-            width: 45, 
-            height: 45,
-            border: '2px solid rgba(255,255,255,0.2)',
-            bgcolor: '#2dbf78'
-          }}
-        >
-          U
-        </Avatar>
-      </Box>
+    <div className="min-h-screen bg-background p-6 flex flex-col items-center justify-center">
+      {/* Header con avatar de usuario */}
+      <div className="absolute top-6 right-6 flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl gradient-purple-blue flex items-center justify-center text-white font-semibold border-2 border-border">
+          <UserIcon className="w-6 h-6" />
+        </div>
+      </div>
 
       {/* Título principal */}
-      <Box sx={{ textAlign: 'center', mb: 6 }}>
-        <Typography 
-          variant="h2" 
-          sx={{ 
-            fontWeight: 700,
-            background: 'linear-gradient(90deg, #ffffff, #2dbf78)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            mb: 2
-          }}
-        >
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent mb-4">
           TurtleTrack
-        </Typography>
-        <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-          Sistema de conservación de tortugas marinas
-        </Typography>
-      </Box>
+        </h1>
+        <p className="text-xl text-muted-foreground font-light">Sistema de conservación de tortugas marinas</p>
+      </div>
 
-      {/* Los 3 botones principales */}
-      <Grid container spacing={3} sx={{ maxWidth: 900, mb: 4 }}>
-        <Grid item xs={12} md={4}>
-          <Link href="/formulario" passHref style={{ textDecoration: 'none' }}>
-            <GradientCard>
-              <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <Avatar sx={{ 
-                  bgcolor: 'rgba(45, 191, 120, 0.2)', 
-                  color: '#2dbf78', 
-                  width: 60, 
-                  height: 60,
-                  margin: '0 auto 16px'
-                }}>
-                  <AddCircleOutline fontSize="large" />
-                </Avatar>
-                <Typography variant="h6" gutterBottom sx={{ color: 'white', fontWeight: 600 }}>
-                  Registrar Evento
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Registra nuevos avistamientos y eventos
-                </Typography>
-              </CardContent>
-            </GradientCard>
-          </Link>
-        </Grid>
+      {/* Tarjetas de acción principales */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-8">
+        <Link href="/formulario" className="group">
+          <div className="bg-card backdrop-blur-xl rounded-3xl p-8 border border-border hover:bg-accent transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20 h-full">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-2xl gradient-purple-blue flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <PlusCircleIcon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Registrar Evento</h3>
+              <p className="text-muted-foreground leading-relaxed">Registra nuevos avistamientos y eventos</p>
+            </div>
+          </div>
+        </Link>
 
-        <Grid item xs={12} md={4}>
-          <Link href="/mapa" passHref style={{ textDecoration: 'none' }}>
-            <GradientCard>
-              <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <Avatar sx={{ 
-                  bgcolor: 'rgba(75, 143, 140, 0.2)', 
-                  color: '#4B8F8C', 
-                  width: 60, 
-                  height: 60,
-                  margin: '0 auto 16px'
-                }}>
-                  <MapOutlined fontSize="large" />
-                </Avatar>
-                <Typography variant="h6" gutterBottom sx={{ color: 'white', fontWeight: 600 }}>
-                  Ver Mapa
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Explora eventos en el mapa
-                </Typography>
-              </CardContent>
-            </GradientCard>
-          </Link>
-        </Grid>
+        <Link href="/mapa" className="group">
+          <div className="bg-card backdrop-blur-xl rounded-3xl p-8 border border-border hover:bg-accent transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20 h-full">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-2xl gradient-blue-cyan flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <MapIcon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Ver Mapa</h3>
+              <p className="text-muted-foreground leading-relaxed">Explora eventos en el mapa</p>
+            </div>
+          </div>
+        </Link>
 
-        <Grid item xs={12} md={4}>
-          <Link href="/estadisticas" passHref style={{ textDecoration: 'none' }}>
-            <GradientCard>
-              <CardContent sx={{ textAlign: 'center', p: 4 }}>
-                <Avatar sx={{ 
-                  bgcolor: 'rgba(45, 191, 120, 0.2)', 
-                  color: '#2dbf78', 
-                  width: 60, 
-                  height: 60,
-                  margin: '0 auto 16px'
-                }}>
-                  <AnalyticsOutlined fontSize="large" />
-                </Avatar>
-                <Typography variant="h6" gutterBottom sx={{ color: 'white', fontWeight: 600 }}>
-                  Estadísticas
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  Analiza datos de conservación
-                </Typography>
-              </CardContent>
-            </GradientCard>
-          </Link>
-        </Grid>
-      </Grid>
+        <Link href="/estadisticas" className="group">
+          <div className="bg-card backdrop-blur-xl rounded-3xl p-8 border border-border hover:bg-accent transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-primary/20 h-full">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-2xl gradient-purple-pink flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <ChartBarIcon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Estadísticas</h3>
+              <p className="text-muted-foreground leading-relaxed">Analiza datos de conservación</p>
+            </div>
+          </div>
+        </Link>
+      </div>
 
-      {/* Contenedor de actividad reciente */}
-      <ActivityCard>
-        <Typography variant="h6" gutterBottom sx={{ color: 'white', fontWeight: 600, textAlign: 'center' }}>
-          Actividad Reciente
-        </Typography>
-        
-        <List sx={{ py: 0 }}>
+      {/* Tarjeta de actividad reciente */}
+      <div className="bg-card backdrop-blur-xl rounded-3xl p-8 border border-border w-full max-w-md">
+        <h3 className="text-xl font-semibold text-foreground mb-6 text-center">Actividad Reciente</h3>
+
+        <div className="space-y-4">
           {activityData.map((activity, index) => (
-            <ListItem key={index} sx={{ px: 0, py: 2 }}>
-              <ListItemAvatar>
-                <Avatar sx={{ 
-                  bgcolor: 'rgba(45, 191, 120, 0.2)', 
-                  color: '#2dbf78' 
-                }}>
-                  {activity.icon}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <Typography variant="body2" sx={{ color: 'white' }}>
-                    {activity.title}
-                  </Typography>
-                }
-                secondary={
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                    {activity.time} • {activity.location}
-                  </Typography>
-                }
-              />
-            </ListItem>
+            <div
+              key={index}
+              className="flex items-start gap-4 p-4 rounded-2xl bg-muted/30 hover:bg-accent transition-colors duration-300"
+            >
+              <div className="w-10 h-10 rounded-xl gradient-purple-blue/20 flex items-center justify-center text-primary flex-shrink-0">
+                {activity.icon}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-foreground text-sm font-medium leading-tight mb-1">{activity.title}</p>
+                <p className="text-muted-foreground text-xs">
+                  {activity.time} • {activity.location}
+                </p>
+              </div>
+            </div>
           ))}
-        </List>
-      </ActivityCard>
-    </DashboardContainer>
-  );
+        </div>
+      </div>
+    </div>
+  )
 }

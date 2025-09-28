@@ -1,33 +1,6 @@
 @import "tailwindcss"; /* Importa TailwindCSS para los estilos utility-first */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css'); /* Importa Font Awesome para los íconos */
 
-:root {
-  --background: #ffffff; /* Define el color de fondo por defecto (blanco) */
-  --foreground: #171717; /* Define el color de primer plano por defecto (negro oscuro) */
-  --primary-color: #2dbf78;
-  --primary-light: #e8f7ef;
-  --primary-dark: #0f2a1f;
-  --secondary-color: #4B8F8C;
-  --gray-light: #f5f7ff;
-  --gray-medium: #e6e9f4;
-  --gray-dark: #828795;
-  --danger: #f36c6c;
-  --success: #2dbf78;
-  --white: #ffffff;
-  --text-primary: #262a39;
-  --text-secondary: #6c7380;
-  --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  --border-radius: 18px;
-}
-
-/* Define un tema inline utilizando las variables CSS para los colores y las fuentes */
-@theme inline {
-  --color-background: var(--background); /* Asocia la variable de color de fondo */
-  --color-foreground: var(--foreground); /* Asocia la variable de color de primer plano */
-  --font-sans: var(--font-geist-sans); /* Define la fuente sans-serif para el tema */
-  --font-mono: var(--font-geist-mono); /* Define la fuente monoespaciada para el tema */
-}
-
 /* Media query para detectar la preferencia del usuario por un esquema oscuro (dark mode) */
 @media (prefers-color-scheme: dark) {
   :root {
@@ -41,6 +14,392 @@ body {
   background: var(--background); /* Aplica el color de fondo definido en :root */
   color: var(--foreground); /* Aplica el color de primer plano definido en :root */
   font-family: Arial, Helvetica, sans-serif; /* Aplica una fuente sans-serif predeterminada si no se carga otra */
+}
+
+:root {
+  /* Modern UI theme inspired by provided design references */
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #475569;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #e0e7ff;
+  --accent-foreground: #3730a3;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #ffffff;
+  --ring: #6366f1;
+  --success: #10b981;
+  --success-foreground: #ffffff;
+  --chart-1: #6366f1;
+  --chart-2: #8b5cf6;
+  --chart-3: #06b6d4;
+  --chart-4: #84cc16;
+  --chart-5: #f59e0b;
+  --radius: 1rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1e293b;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #475569;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #64748b;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-2xl: 2.5rem;
+  --radius-3xl: 3rem;
+  --radius-full: 9999px;
+}
+.dark {
+  --background: #0f0f23;
+  --foreground: #f8fafc;
+  --card: #1a1a2e;
+  --card-foreground: #f8fafc;
+  --popover: #1a1a2e;
+  --popover-foreground: #f8fafc;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #16213e;
+  --secondary-foreground: #cbd5e1;
+  --muted: #16213e;
+  --muted-foreground: #94a3b8;
+  --accent: #312e81;
+  --accent-foreground: #e0e7ff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #334155;
+  --input: #1a1a2e;
+  --ring: #8b5cf6;
+  --success: #10b981;
+  --success-foreground: #ffffff;
+  --chart-1: #8b5cf6;
+  --chart-2: #6366f1;
+  --chart-3: #06b6d4;
+  --chart-4: #84cc16;
+  --chart-5: #f59e0b;
+  --sidebar: #1a1a2e;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #16213e;
+  --sidebar-accent-foreground: #cbd5e1;
+  --sidebar-border: #334155;
+  --sidebar-ring: #94a3b8;
+}
+
+/* Fondo con gradiente sutil para el tema oscuro */
+.dark body {
+  background: linear-gradient(135deg, var(--background) 0%, #1a1a2e 50%, var(--background) 100%);
+}
+
+/* Mejoras para las tarjetas en tema oscuro */
+.bg-card {
+  background: var(--card);
+}
+
+.bg-accent {
+  background: var(--accent);
+}
+
+.bg-muted {
+  background: var(--muted);
+}
+
+/* Text colors */
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+/* Border colors */
+.border-border {
+  border-color: var(--border);
+}
+
+/* Gradientes mejorados para tema oscuro */
+.gradient-purple-blue {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+}
+
+.gradient-purple-pink {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+}
+
+.gradient-blue-cyan {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+}
+
+.gradient-emerald-teal {
+  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+}
+
+/* Efectos de backdrop mejorados */
+.backdrop-blur-xl {
+  backdrop-filter: blur(20px);
+}
+
+/* Mejoras para los sliders en tema oscuro */
+.slider-thumb {
+  background: var(--primary);
+}
+
+.slider-thumb::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slider-thumb::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 16px);
+  --radius-3xl: calc(var(--radius) + 24px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Modern fluid animations inspired by design references */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Enhanced mobile optimizations */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .mobile-padding {
+    padding: 1.5rem;
+  }
+
+  .mobile-text {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  border-radius: inherit;
+  transition: 
+    color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sombras mejoradas para tema oscuro */
+.shadow-primary\/20 {
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+}
+
+/* Estados hover mejorados */
+.hover\:bg-accent:hover {
+  background-color: var(--accent);
+}
+
+.hover\:shadow-2xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Clases utilitarias para bordes redondeados */
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+
+.rounded-3xl {
+  border-radius: var(--radius-3xl);
+}
+
+.rounded-full {
+  border-radius: var(--radius-full);
+}
+
+/* Bordes redondeados específicos para componentes */
+.card-rounded {
+  border-radius: var(--radius-xl);
+}
+
+.button-rounded {
+  border-radius: var(--radius-lg);
+}
+
+.input-rounded {
+  border-radius: var(--radius-md);
 }
 
 /* Estilos para la página principal de TurtleTrack */

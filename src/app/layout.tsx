@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode; // Los elementos hijos que se pasarán a este componente RootLayout
 }) {
   return (
-    <html lang="es"> {/* El idioma de la página está configurado a español */}
+    <html lang="es" className="dark"> {/* El idioma de la página está configurado a español */}
       <head>
         {/* Enlace a la hoja de estilo de Font Awesome para los íconos */}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />

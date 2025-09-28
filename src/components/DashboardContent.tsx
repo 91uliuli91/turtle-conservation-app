@@ -1,6 +1,5 @@
 // src/components/DashboardContent.tsx
-'use client';
-import Link from 'next/link'; // Importamos Link de Next.js para navegación entre páginas
+"use client"
 
 export default function DashboardContent() {
   return (
@@ -45,8 +44,8 @@ export default function DashboardContent() {
           <div className="campaign-info">
             <h2 className="campaign-title">Temporada de Anidación 2024</h2>
             <p className="campaign-desc">
-              Estamos en el pico de la temporada de anidación. Mantén un registro 
-              detallado de cada evento para mejorar nuestros programas de conservación.
+              Estamos en el pico de la temporada de anidación. Mantén un registro detallado de cada evento para mejorar
+              nuestros programas de conservación.
             </p>
             <button className="campaign-btn">
               <i className="fas fa-plus"></i>
@@ -208,5 +207,5 @@ export default function DashboardContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -16,9 +16,9 @@ interface EventDetailsProps {
 export default function EventDetails({ eventType, onDetailsChange, onBack, onNext }: EventDetailsProps) {
   // Estado local para almacenar los detalles del evento
   const [details, setDetails] = useState({
-    numeroHuevos: 0, // Número de huevos (sólo para eventos de anidación)
+    numeroHuevos: 50, // Número de huevos (sólo para eventos de anidación)
     largoCaparazon: 50, // Largo del caparazón (para arqueo y anidación)
-    anchoCaparazon: 40, // Ancho del caparazón (para arqueo y anidación)
+    anchoCaparazon: 50, // Ancho del caparazón (para arqueo y anidación)
     observaciones: '', // Observaciones adicionales
     seColocoMarca: false, // Checkbox para marca nueva (sólo para arqueo/anidación)
     seRemarco: false // Checkbox para remarcado (sólo para arqueo/anidación)
@@ -42,7 +42,7 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
           <button
             className="w-14 h-14 bg-slate-800 hover:bg-slate-700 rounded-full 
                     text-2xl font-light text-gray-300 transition-all duration-200
-                    shadow-lg hover:shadow-xl"
+                    shadow-lg hover:shadow-xl pb-4"
             onClick={() => updateDetail('numeroHuevos', Math.max(0, details.numeroHuevos - 1))}
           >
             −
@@ -59,6 +59,14 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
             +
           </button>
         </div>
+        <input
+          type="range"
+          min="0"
+          max="250"
+          value={details.numeroHuevos}
+          onChange={(e) => updateDetail('numeroHuevos', Number(e.target.value))}
+          className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb"
+        />
       </div>
     </div>
   );
@@ -77,8 +85,8 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
         </div>
         <input
           type="range"
-          min="20"
-          max="200"
+          min="0"
+          max="250"
           value={details.largoCaparazon}
           onChange={(e) => updateDetail('largoCaparazon', Number(e.target.value))}
           className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb"
@@ -96,8 +104,8 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
         </div>
         <input
           type="range"
-          min="15"
-          max="150"
+          min="0"
+          max="250"
           value={details.anchoCaparazon}
           onChange={(e) => updateDetail('anchoCaparazon', Number(e.target.value))}
           className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb"
