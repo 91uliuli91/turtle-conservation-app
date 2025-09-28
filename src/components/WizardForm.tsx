@@ -29,16 +29,22 @@ export default function WizardForm() {
   const updateEventData = (field: string, value: any) => {
     setEventData(prev => ({ ...prev, [field]: value }));
   };
-
+  
   // Sincronizar automáticamente cuando hay conexión
-  useEffect(() => {
-    if (isOnline && pendingSyncs > 0) {
-      console.log('Intentando sincronizar eventos pendientes...');
-      syncPendingEvents().catch(error => {
-        console.error('Error en sincronización automática:', error);
-      });
-    }
-  }, [isOnline, pendingSyncs, syncPendingEvents]);
+useEffect(() => {
+  let syncInterval: NodeJS.Timeout;
+
+  if (isOnline && pendingSyncs > 0) {
+    // Intentar sincronizar cada 30 segundos mientras haya eventos pendientes
+    syncInterval = setInterval(() => {
+      syncPendingEvents().catch(console.error);
+    }, 30000);
+  }
+
+  return () => {
+    if (syncInterval) clearInterval(syncInterval);
+  };
+}, [isOnline, pendingSyncs, syncPendingEvents]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -65,7 +71,7 @@ export default function WizardForm() {
       setIsSaving(false);
     }
   };
-
+  
   const renderCurrentStep = () => {
     switch (currentStep) {
       case 1:
@@ -118,7 +124,7 @@ export default function WizardForm() {
         return <div>Paso no válido</div>;
     }
   };
-
+  
   return (
       <div className="w-full h-full bg-gradient-to-br from-[#0a0f0f] to-[#0f1a1a] text-[#f0fdf4]  shadow-2xl border border-[#1a3d2c] overflow-hidden">
       {/* Header con indicador de conexión */}
