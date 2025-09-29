@@ -134,8 +134,8 @@ export default function WizardForm() {
         <div className="max-w-2xl mx-auto">
           <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 mb-8">
             <div className="flex justify-between items-start mb-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl font-light text-balance tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              <div className="space-y-4 ">
+                <h1 className="text-3xl sm:text-5xl font-bold text-balance bg-gradient-to-r from-primary to-primary/100 bg-clip-text text-transparent rounded-none ">
                   Registro de Evento
                 </h1>
                 <p className="text-muted-foreground text-xl text-pretty leading-relaxed">

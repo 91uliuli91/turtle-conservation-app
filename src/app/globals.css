@@ -389,6 +389,10 @@ body {
   border-radius: var(--radius-full);
 }
 
+.rounded-none {
+  border-radius: 0;
+}
+
 /* Bordes redondeados específicos para componentes */
 .card-rounded {
   border-radius: var(--radius-xl);
