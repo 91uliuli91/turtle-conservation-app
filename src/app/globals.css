@@ -1,23 +1,12 @@
+/* globals.css - Archivo CSS reorganizado y optimizado */
+
+/* ===== IMPORTS ===== */
 @import "tailwindcss"; /* Importa TailwindCSS para los estilos utility-first */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css'); /* Importa Font Awesome para los íconos */
 
-/* Media query para detectar la preferencia del usuario por un esquema oscuro (dark mode) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a; /* Si el esquema es oscuro, cambia el color de fondo a negro */
-    --foreground: #ededed; /* Si el esquema es oscuro, cambia el color de texto a un gris claro */
-  }
-}
-
-/* Estilos generales para el cuerpo de la página */
-body {
-  background: var(--background); /* Aplica el color de fondo definido en :root */
-  color: var(--foreground); /* Aplica el color de primer plano definido en :root */
-  font-family: Arial, Helvetica, sans-serif; /* Aplica una fuente sans-serif predeterminada si no se carga otra */
-}
-
+/* ===== VARIABLES CSS ===== */
 :root {
-  /* Modern UI theme inspired by provided design references */
+  /* Colores base - Tema claro */
   --background: #f8fafc;
   --foreground: #1e293b;
   --card: #ffffff;
@@ -39,12 +28,25 @@ body {
   --ring: #6366f1;
   --success: #10b981;
   --success-foreground: #ffffff;
+  
+  /* Colores para gráficos */
   --chart-1: #6366f1;
   --chart-2: #8b5cf6;
   --chart-3: #06b6d4;
   --chart-4: #84cc16;
   --chart-5: #f59e0b;
+  
+  /* Sistema de radios */
   --radius: 1rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-2xl: 2.5rem;
+  --radius-3xl: 3rem;
+  --radius-full: 9999px;
+  
+  /* Sidebar */
   --sidebar: #ffffff;
   --sidebar-foreground: #1e293b;
   --sidebar-primary: #6366f1;
@@ -53,14 +55,9 @@ body {
   --sidebar-accent-foreground: #475569;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #64748b;
-  --radius-sm: 0.5rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
-  --radius-2xl: 2.5rem;
-  --radius-3xl: 3rem;
-  --radius-full: 9999px;
 }
+
+/* Tema oscuro */
 .dark {
   --background: #0f0f23;
   --foreground: #f8fafc;
@@ -83,11 +80,15 @@ body {
   --ring: #8b5cf6;
   --success: #10b981;
   --success-foreground: #ffffff;
+  
+  /* Colores para gráficos - Tema oscuro */
   --chart-1: #8b5cf6;
   --chart-2: #6366f1;
   --chart-3: #06b6d4;
   --chart-4: #84cc16;
   --chart-5: #f59e0b;
+  
+  /* Sidebar - Tema oscuro */
   --sidebar: #1a1a2e;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #8b5cf6;
@@ -98,93 +99,43 @@ body {
   --sidebar-ring: #94a3b8;
 }
 
-/* Fondo con gradiente sutil para el tema oscuro */
+/* ===== BASE STYLES ===== */
+* {
+  border-radius: inherit;
+  transition: 
+    color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Media query para detección automática de tema oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Fondo con gradiente para tema oscuro */
 .dark body {
   background: linear-gradient(135deg, var(--background) 0%, #1a1a2e 50%, var(--background) 100%);
 }
 
-/* Mejoras para las tarjetas en tema oscuro */
-.bg-card {
-  background: var(--card);
-}
-
-.bg-accent {
-  background: var(--accent);
-}
-
-.bg-muted {
-  background: var(--muted);
-}
-
-/* Text colors */
-.text-foreground {
-  color: var(--foreground);
-}
-
-.text-muted-foreground {
-  color: var(--muted-foreground);
-}
-
-.text-primary {
-  color: var(--primary);
-}
-
-/* Border colors */
-.border-border {
-  border-color: var(--border);
-}
-
-/* Gradientes mejorados para tema oscuro */
-.gradient-purple-blue {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-}
-
-.gradient-purple-pink {
-  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-}
-
-.gradient-blue-cyan {
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-}
-
-.gradient-emerald-teal {
-  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
-}
-
-/* Efectos de backdrop mejorados */
-.backdrop-blur-xl {
-  backdrop-filter: blur(20px);
-}
-
-/* Mejoras para los sliders en tema oscuro */
-.slider-thumb {
-  background: var(--primary);
-}
-
-.slider-thumb::-webkit-slider-thumb {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--primary);
-  cursor: pointer;
-  border: 2px solid var(--background);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
-.slider-thumb::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--primary);
-  cursor: pointer;
-  border: 2px solid var(--background);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-}
-
+/* ===== TAILWIND THEME CONFIGURATION ===== */
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Colores */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -206,17 +157,23 @@ body {
   --color-ring: var(--ring);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
+  
+  /* Colores para gráficos */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  
+  /* Sistema de radios */
   --radius-sm: calc(var(--radius) - 8px);
   --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 8px);
   --radius-2xl: calc(var(--radius) + 16px);
   --radius-3xl: calc(var(--radius) + 24px);
+  
+  /* Sidebar */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -238,7 +195,124 @@ body {
   }
 }
 
-/* Modern fluid animations inspired by design references */
+/* ===== UTILITY CLASSES ===== */
+
+/* Colores de fondo */
+.bg-card {
+  background: var(--card);
+}
+
+.bg-accent {
+  background: var(--accent);
+}
+
+.bg-muted {
+  background: var(--muted);
+}
+
+/* Colores de texto */
+.text-foreground {
+  color: var(--foreground);
+}
+
+.text-muted-foreground {
+  color: var(--muted-foreground);
+}
+
+.text-primary {
+  color: var(--primary);
+}
+
+/* Colores de borde */
+.border-border {
+  border-color: var(--border);
+}
+
+/* Gradientes */
+.gradient-purple-blue {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+}
+
+.gradient-purple-pink {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+}
+
+.gradient-blue-cyan {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+}
+
+.gradient-emerald-teal {
+  background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+}
+
+/* Efectos de backdrop */
+.backdrop-blur-xl {
+  backdrop-filter: blur(20px);
+}
+
+/* Sombras */
+.shadow-primary\/20 {
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+}
+
+.hover\:shadow-2xl:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Estados hover */
+.hover\:bg-accent:hover {
+  background-color: var(--accent);
+}
+
+/* Sistema de radios */
+.rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+
+.rounded-3xl {
+  border-radius: var(--radius-3xl);
+}
+
+.rounded-full {
+  border-radius: var(--radius-full);
+}
+
+.rounded-none {
+  border-radius: 0;
+}
+
+/* Radios específicos para componentes */
+.card-rounded {
+  border-radius: var(--radius-xl);
+}
+
+.button-rounded {
+  border-radius: var(--radius-lg);
+}
+
+.input-rounded {
+  border-radius: var(--radius-md);
+}
+
+/* ===== ANIMATIONS ===== */
+
+/* Animaciones de entrada */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -272,9 +346,37 @@ body {
   }
 }
 
-@keyframes pulse {
-  0%,
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+  }
   100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes check-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Animaciones de pulso */
+@keyframes pulse {
+  0%, 100% {
     opacity: 1;
   }
   50% {
@@ -282,6 +384,112 @@ body {
   }
 }
 
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+@keyframes pulse-completed {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(139, 92, 246, 0);
+  }
+}
+
+@keyframes pulse-current {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+  }
+}
+
+/* Animaciones de movimiento */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%);
+  }
+  20% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(-50%) translateX(0);
+  }
+  50% {
+    transform: translateY(-50%) translateX(-2px);
+  }
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animaciones de carga */
+@keyframes fill-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--target-width);
+  }
+}
+
+@keyframes smooth-load {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1.02);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes step-wave {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Clases de animación */
 .animate-fadeInUp {
   animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -298,24 +506,92 @@ body {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Enhanced mobile optimizations */
-@media (max-width: 768px) {
-  .touch-target {
-    min-height: 48px;
-    min-width: 48px;
-  }
-
-  .mobile-padding {
-    padding: 1.5rem;
-  }
-
-  .mobile-text {
-    font-size: 1rem;
-    line-height: 1.6;
-  }
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Custom scrollbar */
+.animate-pulse-completed {
+  animation: pulse-completed 2s infinite;
+}
+
+.animate-pulse-current {
+  animation: pulse-current 2s infinite;
+}
+
+.animate-shine {
+  animation: shine 2s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-check-in {
+  animation: check-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-smooth-load {
+  animation: smooth-load 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.progressive-fill {
+  animation: fill-progress 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-wave {
+  animation: wave 0.5s ease-in-out;
+}
+
+.step-transition {
+  animation: step-wave 0.5s ease-in-out;
+}
+
+/* Transiciones suaves adicionales */
+.ultra-smooth {
+  transition: width 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.smooth-progress {
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ===== COMPONENT STYLES ===== */
+
+/* Sliders personalizados */
+.slider-thumb {
+  background: var(--primary);
+}
+
+.slider-thumb::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.slider-thumb::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  border: 2px solid var(--background);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar personalizado */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -334,79 +610,8 @@ body {
   opacity: 0.8;
 }
 
-/* Smooth transitions for all interactive elements */
-* {
-  border-radius: inherit;
-  transition: 
-    color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
+/* ===== TURTLETRACK DASHBOARD STYLES ===== */
 
-/* Sombras mejoradas para tema oscuro */
-.shadow-primary\/20 {
-  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
-}
-
-/* Estados hover mejorados */
-.hover\:bg-accent:hover {
-  background-color: var(--accent);
-}
-
-.hover\:shadow-2xl:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-/* Clases utilitarias para bordes redondeados */
-.rounded-sm {
-  border-radius: var(--radius-sm);
-}
-
-.rounded-md {
-  border-radius: var(--radius-md);
-}
-
-.rounded-lg {
-  border-radius: var(--radius-lg);
-}
-
-.rounded-xl {
-  border-radius: var(--radius-xl);
-}
-
-.rounded-2xl {
-  border-radius: var(--radius-2xl);
-}
-
-.rounded-3xl {
-  border-radius: var(--radius-3xl);
-}
-
-.rounded-full {
-  border-radius: var(--radius-full);
-}
-
-.rounded-none {
-  border-radius: 0;
-}
-
-/* Bordes redondeados específicos para componentes */
-.card-rounded {
-  border-radius: var(--radius-xl);
-}
-
-.button-rounded {
-  border-radius: var(--radius-lg);
-}
-
-.input-rounded {
-  border-radius: var(--radius-md);
-}
-
-/* Estilos para la página principal de TurtleTrack */
 .turtletrack-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #4B8F8C 0%, #0F2A1F 100%);
@@ -414,7 +619,7 @@ body {
   padding: 40px;
 }
 
-/* Header Styles */
+/* Header */
 .turtletrack-header {
   display: flex;
   justify-content: space-between;
@@ -690,7 +895,26 @@ body {
   opacity: 0.7;
 }
 
-/* Responsive Design */
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Optimizaciones para móviles */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .mobile-padding {
+    padding: 1.5rem;
+  }
+
+  .mobile-text {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}
+
+/* Responsive para TurtleTrack Dashboard */
 @media (max-width: 1200px) {
   .turtletrack-actions {
     grid-template-columns: repeat(2, 1fr);
@@ -727,28 +951,4 @@ body {
     flex: none;
     min-width: 80px;
   }
-}
-
-/* Animaciones */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.turtletrack-action-card {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.turtletrack-action-card:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.turtletrack-action-card:nth-child(3) {
-  animation-delay: 0.2s;
 }
