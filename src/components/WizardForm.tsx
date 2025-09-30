@@ -278,6 +278,7 @@ export default function WizardForm() {
                     </div>
                     <span className="font-semibold text-lg">Error al guardar el evento</span>
                   </div>
+                  
                 )}
               </div>
             </div>
