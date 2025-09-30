@@ -29,18 +29,17 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode; // Los elementos hijos que se pasarán a este componente RootLayout
+  children: React.ReactNode
 }) {
   return (
-    <html lang="es" className="dark"> {/* El idioma de la página está configurado a español */}
+    <html lang="es" className="dark">
       <head>
-        {/* Enlace a la hoja de estilo de Font Awesome para los íconos */}
+        <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/uber-move-text" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}> {/* Aplica las fuentes Geist y Geist_Mono globalmente */}
-        {children} {/* Renderiza el contenido de la página */}
+      <body className={`${geistSans.variable} ${geistMono.variable} font-uber-move`}>
+        {children}
       </body>
     </html>
-  );
+  )
 }
-

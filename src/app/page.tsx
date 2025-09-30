@@ -2,6 +2,7 @@
 "use client"
 import Link from "next/link"
 import { PlusCircleIcon, MapIcon, ChartBarIcon, UserIcon, EyeIcon, CalendarIcon } from "@heroicons/react/24/outline"
+import './globals.css'; 
 
 export default function TurtleTrackDashboard() {
   const activityData = [

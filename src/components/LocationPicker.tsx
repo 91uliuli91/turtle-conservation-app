@@ -1,6 +1,7 @@
 // LocationPicker.tsx - Versión actualizada con bordes más redondeados
 "use client"
 
+import '../app/globals.css';
 interface LocationPickerProps {
   onLocationConfirm: (lat: number, lon: number) => void
   onBack: () => void
@@ -36,8 +37,8 @@ export default function LocationPicker({ onLocationConfirm, onBack }: LocationPi
           <button
             onClick={handleUseCurrentLocation}
             className="w-full p-6 gradient-purple-blue text-white rounded-3xl font-semibold 
-                     hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 
-                     transition-all duration-500 ease-out group"
+                    hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 
+                    transition-all duration-500 ease-out group"
           >
             <div className="flex items-center justify-center space-x-4">
               <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
@@ -68,8 +69,8 @@ export default function LocationPicker({ onLocationConfirm, onBack }: LocationPi
           <button
             onClick={onBack}
             className="flex-1 px-6 py-4 bg-muted/50 border border-border rounded-2xl text-foreground 
-                     hover:bg-muted hover:scale-105 transition-all duration-300 font-medium
-                     flex items-center justify-center space-x-2"
+                    hover:bg-muted hover:scale-105 transition-all duration-300 font-medium
+                    flex items-center justify-center space-x-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -80,8 +81,8 @@ export default function LocationPicker({ onLocationConfirm, onBack }: LocationPi
           <button
             onClick={() => onLocationConfirm(9.9281, -84.0907)}
             className="flex-1 px-6 py-4 bg-secondary border border-border rounded-2xl text-secondary-foreground 
-                     hover:bg-accent hover:scale-105 transition-all duration-300 font-medium
-                     flex items-center justify-center space-x-2"
+                    :bg-accent hover:scale-105 transition-all duration-300 font-medium
+                    flex items-center justify-center space-x-2"
           >
             <span>Continuar sin ubicación</span>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

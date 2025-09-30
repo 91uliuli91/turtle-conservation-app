@@ -4,6 +4,7 @@
 'use client';
 
 import { useState } from 'react';
+import '../app/globals.css';
 
 // Definición de las propiedades que se pasan al componente EventDetails
 interface EventDetailsProps {

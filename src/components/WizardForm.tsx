@@ -8,6 +8,8 @@ import EventDetails from "./EventDetails"
 import PhotoStep from "./PhotoStep"
 import SummaryStep from "./SummaryStep"
 
+import '../app/globals.css';
+
 // Mock hook for offline functionality
 const useOffline = () => ({
   isOnline: true,

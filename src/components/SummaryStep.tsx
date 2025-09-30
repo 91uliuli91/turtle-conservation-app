@@ -1,6 +1,7 @@
 // src/components/SummaryStep.tsx
 "use client"
 
+import '../app/globals.css';
 interface SummaryStepProps {
   eventData: any
   onBack: () => void

@@ -4,6 +4,7 @@
 // mostrando un diseño interactivo y visualmente atractivo, con un icono y descripción de cada tipo de evento.
 // EventTypeSelector.tsx - Versión actualizada con bordes más redondeados
 "use client"
+import '../app/globals.css';
 
 interface EventTypeSelectorProps {
   onSelect: (type: string) => void
