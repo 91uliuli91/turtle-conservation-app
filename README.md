@@ -1,3 +1,12 @@
+# TurtleTrack - Sistema de Conservación de Tortugas Marinas
+
+Sistema completo para la gestión y monitoreo de tortugas marinas con funcionalidad offline.
+
+## Estado del proyecto
+- ✅ Deploy en GitHub Pages: https://91uliuli91.github.io/turtle-conservation-app/
+- ✅ Funcionalidad offline completa
+- 🚀 Dependencias actualizadas (@heroicons/react)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
