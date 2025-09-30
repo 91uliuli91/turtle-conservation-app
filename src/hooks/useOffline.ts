@@ -4,6 +4,33 @@
 import { useState, useEffect } from 'react';
 import { db, EventoOffline, initDB } from '@/app/lib/offlineDB';
 
+// Función para enviar evento a la API
+const sendEventToAPI = async (evento: EventoOffline) => {
+  const response = await fetch('/api/API_routes/eventos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      tipo_evento: evento.tipo_evento,
+      fecha_hora: evento.fecha_hora,
+      campamento_id: evento.campamento_id,
+      zona_playa: evento.zona_playa,
+      coordenada_lat: evento.coordenada_lat,
+      coordenada_lon: evento.coordenada_lon,
+      tortuga_id: evento.tortuga_id,
+      personal_registro_id: 1, // Valor por defecto, ajustar según sea necesario
+      observaciones: evento.observaciones
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export const useOffline = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [pendingSyncs, setPendingSyncs] = useState(0);
@@ -131,7 +158,7 @@ useEffect(() => {
 // Contar eventos pendientes
 const countPendingEvents = async () => {
     try {
-    const count = await db.eventos.where('sincronizado').equals(false).count();
+    const count = await db.eventos.where('sincronizado').equals(0).count();
     setPendingSyncs(count);
     return count;
     } catch (error) {
@@ -143,7 +170,7 @@ const countPendingEvents = async () => {
 // Obtener eventos pendientes
 const getPendingEvents = async () => {
     try {
-    return await db.eventos.where('sincronizado').equals(false).toArray();
+    return await db.eventos.where('sincronizado').equals(0).toArray();
     } catch (error) {
     console.error('Error obteniendo eventos pendientes:', error);
     return [];

@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 
@@ -316,10 +319,10 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: 'Nido eliminado exitosamente'
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error al eliminar nido:', error);
     
-    if (error.code === '23503') { // Foreign key constraint violation
+    if (error && typeof error === 'object' && 'code' in error && error.code === '23503') {
       return NextResponse.json({
         success: false,
         error: 'No se puede eliminar el nido porque tiene exhumaciones asociadas'

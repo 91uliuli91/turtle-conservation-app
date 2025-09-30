@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 
@@ -296,7 +299,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error: any) {
     console.error('Error al eliminar evento:', error);
     
-    if (error.code === '23503') { // Foreign key constraint violation
+    if ((error as any)?.code === '23503') { // Foreign key constraint violation
       return NextResponse.json({
         success: false,
         error: 'No se puede eliminar el evento porque tiene registros asociados'

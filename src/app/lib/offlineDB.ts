@@ -11,7 +11,7 @@ export interface EventoOffline {
   coordenada_lon: number;
   tortuga_id?: number | null;
   observaciones?: string | null;
-  detalles: any;
+  detalles: Record<string, unknown>;
   fotos: string[];
   sincronizado: number; // ← Cambiado de boolean a number (0 = false, 1 = true)
   createdAt: Date;

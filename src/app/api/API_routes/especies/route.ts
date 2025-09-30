@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error('Error al crear especie:', error);
     
-    if (error.code === '23505') { // Unique constraint violation
+    if ((error as any)?.code === '23505') { // Unique constraint violation
       return NextResponse.json({
         success: false,
         error: 'Ya existe una especie con ese nombre'
@@ -141,7 +144,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error: any) {
     console.error('Error al eliminar especie:', error);
     
-    if (error.code === '23503') { // Foreign key constraint violation
+    if ((error as any)?.code === '23503') { // Foreign key constraint violation
       return NextResponse.json({
         success: false,
         error: 'No se puede eliminar la especie porque tiene tortugas asociadas'
