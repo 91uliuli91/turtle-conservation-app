@@ -45,7 +45,7 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
       <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50 w-full max-w-md">
         <div className="mb-8 text-center">
           
-          <h2 className="text-3xl font-light text-foreground mb-4 text-balance">Nuevo Registro</h2>
+          <h2 className="text-3xl font-light text-foreground mb-2 text-balance">Nuevo Registro</h2>
           <p className="text-muted-foreground text-lg text-pretty">¿Qué tipo de evento registras?</p>
         </div>
 
@@ -55,9 +55,9 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
               key={event.id}
               onClick={() => onSelect(event.id)}
               className={`group w-full p-6 rounded-3xl border transition-all duration-500 ease-out
-                         hover:scale-105 hover:shadow-2xl hover:shadow-primary/10
-                         bg-gradient-to-r ${event.bgColor} ${event.borderColor}
-                         hover:border-primary/30 animate-fadeInUp`}
+                        hover:scale-105 hover:shadow-2xl hover:shadow-primary/10
+                        bg-gradient-to-r ${event.bgColor} ${event.borderColor}
+                        hover:border-primary/30 animate-fadeInUp`}
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center space-x-5">
@@ -65,8 +65,8 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
                   {event.icon}
                 </div>
 
-                <div className="text-left flex-1">
-                  <div className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+                <div className="text-left flex-1 m-0">
+                  <div className="text-xl font-semibold text-foreground mb-1 group-hover:text-primary transition-colors duration-300">
                     {event.name}
                   </div>
                   <div className="text-muted-foreground text-sm leading-relaxed">{event.description}</div>
