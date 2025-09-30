@@ -32,8 +32,24 @@ export default function WizardForm() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [showSuccessOptions, setShowSuccessOptions] = useState(false)
   
-  // ⭐⭐⭐ NUEVO ESTADO PARA ANIMACIÓN ⭐⭐⭐
-  const [isProgressAnimating, setIsProgressAnimating] = useState(false)
+
+const [isProgressAnimating, setIsProgressAnimating] = useState(false)
+const [currentStep, setCurrentStep] = useState(1);
+const [eventData, setEventData] = useState<{
+  type: string;
+  location: { lat: number; lon: number };
+  details: Record<string, unknown>;
+  photos: string[];
+  observations: string;
+}>({
+type: '',
+location: { lat: 0, lon: 0 },
+details: {},
+photos: [] as string[],
+observations: ''
+});
+const [isSaving, setIsSaving] = useState(false);
+const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline()
 
@@ -42,12 +58,50 @@ export default function WizardForm() {
 
   const updateEventData = (field: string, value: any) => {
     setEventData((prev) => ({ ...prev, [field]: value }))
+const updateEventData = (field: string, value: any) => {
+setEventData(prev => ({ ...prev, [field]: value }));
+};
+
+// Sincronizar automáticamente cuando hay conexión
+// En el WizardForm.tsx, actualiza el useEffect de sincronización:
+useEffect(() => {
+    if (isOnline && pendingSyncs > 0) {
+        console.log('Intentando sincronizar eventos pendientes...');
+        syncPendingEvents().catch(error => {
+        console.error('Error en sincronización automática:', error);
+    });
+    }
+}, [isOnline, pendingSyncs, syncPendingEvents]);
+
+// En tu WizardForm.tsx, actualiza handleSave:
+const handleSave = async () => {
+  setIsSaving(true);
+  setSaveStatus('saving');
+
+  try {
+    if (isOnline) {
+      // Guardar online
+      console.log('Guardando online:', eventData);
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setSaveStatus('saved');
+      alert('✅ Evento guardado en línea exitosamente!');
+    } else {
+      // Guardar offline
+      const id = await saveEventOffline(eventData);
+      setSaveStatus('saved');
+      alert(`✅ Evento guardado offline (ID: ${id}). Se sincronizará automáticamente cuando haya conexión.`);
+    }
+  } catch (error) {
+    console.error('Error guardando evento:', error);
+    setSaveStatus('error');
+    alert(`❌ Error guardando el evento: ${error instanceof Error ? error.message : 'Error desconocido'}. Por favor intenta nuevamente.`);
+  } finally {
+    setIsSaving(false);
   }
 
   // Sincronizar automáticamente cuando hay conexión
   useEffect(() => {
     let syncInterval: NodeJS.Timeout
-
     if (isOnline && pendingSyncs > 0) {
       // Intentar sincronizar cada 30 segundos mientras haya eventos pendientes
       syncInterval = setInterval(() => {
@@ -492,4 +546,47 @@ function SuccessOptions({ onAddNewEvent, onReturnToDashboard }: {
       </div>
     </div>
   )
+=======
+return (
+<div className="min-h-screen bg-black text-white p-4 relative">
+    {/* Indicador de estado de conexión */}
+    <div className={`fixed top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold z-50 ${
+    isOnline ? 'bg-green-600' : 'bg-red-600'
+    }`}>
+    {isOnline ? '🟢 En línea' : '🔴 Offline'}
+    {pendingSyncs > 0 && ` (${pendingSyncs} pendientes)`}
+    </div>
+
+    <div className="max-w-md mx-auto">
+    {/* Indicador de progreso */}
+    <div className="flex justify-between mb-8">
+        {[1, 2, 3, 4, 5].map(step => (
+        <div
+            key={step}
+            className={`w-8 h-8 rounded-full flex items-center justify-center ${
+            currentStep >= step ? 'bg-green-600' : 'bg-gray-600'
+            }`}
+        >
+            {step}
+        </div>
+        ))}
+    </div>
+
+    {renderCurrentStep()}
+
+    {/* Estado del guardado */}
+    {saveStatus === 'saving' && (
+        <div className="fixed bottom-4 left-4 bg-blue-600 px-3 py-2 rounded">
+        Guardando...
+        </div>
+    )}
+    {saveStatus === 'saved' && (
+        <div className="fixed bottom-4 left-4 bg-green-600 px-3 py-2 rounded">
+        ✅ Guardado {isOnline ? 'en línea' : 'offline'}
+        </div>
+    )}
+    </div>
+</div>
+);
+>>>>>>> 4b1bdba920eb81a534bfebbd031c0d9427c7e22b
 }

@@ -30,7 +30,7 @@ export const testConnection = async (): Promise<boolean> => {
 };
 
 // Función para ejecutar consultas con manejo de errores
-export const query = async (text: string, params?: any[]) => {
+export const query = async (text: string, params?: unknown[]) => {
   try {
     const start = Date.now();
     const result = await pool.query(text, params);

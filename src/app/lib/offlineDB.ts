@@ -3,6 +3,7 @@ import Dexie, { Table } from 'dexie'; // Importamos Dexie, la librería que faci
 
 // Definimos la estructura de los eventos almacenados en la base de datos offline
 export interface EventoOffline {
+<<<<<<< HEAD
   id?: number; // ID del evento (autoincremental)
   tipo_evento: string; // Tipo de evento (anidación, arqueo, etc.)
   fecha_hora: Date; // Fecha y hora del evento
@@ -16,6 +17,21 @@ export interface EventoOffline {
   fotos: string[]; // Array de URLs de fotos asociadas al evento
   sincronizado: number; // Indica si el evento está sincronizado (0 = no, 1 = sí)
   createdAt: Date; // Fecha de creación del evento
+=======
+  id?: number;
+  tipo_evento: string;
+  fecha_hora: Date;
+  campamento_id?: number | null;
+  zona_playa?: string | null;
+  coordenada_lat: number;
+  coordenada_lon: number;
+  tortuga_id?: number | null;
+  observaciones?: string | null;
+  detalles: Record<string, unknown>;
+  fotos: string[];
+  sincronizado: number; // ← Cambiado de boolean a number (0 = false, 1 = true)
+  createdAt: Date;
+>>>>>>> 4b1bdba920eb81a534bfebbd031c0d9427c7e22b
 }
 
 // Clase que extiende Dexie para crear la base de datos offline

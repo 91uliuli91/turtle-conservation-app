@@ -4,7 +4,37 @@
 import { useState, useEffect } from 'react'; // Importamos hooks de React para gestionar el estado y efectos secundarios
 import { db, EventoOffline, initDB } from '@/app/lib/offlineDB'; // Importamos la base de datos Dexie.js y su inicialización
 
+<<<<<<< HEAD
 // Custom hook que maneja la lógica offline y la sincronización de eventos
+=======
+// Función para enviar evento a la API
+const sendEventToAPI = async (evento: EventoOffline) => {
+  const response = await fetch('/api/API_routes/eventos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      tipo_evento: evento.tipo_evento,
+      fecha_hora: evento.fecha_hora,
+      campamento_id: evento.campamento_id,
+      zona_playa: evento.zona_playa,
+      coordenada_lat: evento.coordenada_lat,
+      coordenada_lon: evento.coordenada_lon,
+      tortuga_id: evento.tortuga_id,
+      personal_registro_id: 1, // Valor por defecto, ajustar según sea necesario
+      observaciones: evento.observaciones
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error ${response.status}: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+>>>>>>> 4b1bdba920eb81a534bfebbd031c0d9427c7e22b
 export const useOffline = () => {
   // Estado que maneja si el usuario está en línea u offline
   const [isOnline, setIsOnline] = useState(true); 
@@ -136,9 +166,15 @@ export const useOffline = () => {
   // Función para contar los eventos pendientes (sincronizados = 0)
   const countPendingEvents = async () => {
     try {
+<<<<<<< HEAD
       const count = await db.eventos.where('sincronizado').equals(0).count(); // Cuenta los eventos pendientes
       setPendingSyncs(count); // Actualiza el número de eventos pendientes
       return count;
+=======
+    const count = await db.eventos.where('sincronizado').equals(0).count();
+    setPendingSyncs(count);
+    return count;
+>>>>>>> 4b1bdba920eb81a534bfebbd031c0d9427c7e22b
     } catch (error) {
       console.error('Error contando eventos pendientes:', error); // Maneja cualquier error al contar eventos pendientes
       return 0;
@@ -148,7 +184,11 @@ export const useOffline = () => {
   // Función para obtener todos los eventos pendientes (sincronizados = 0)
   const getPendingEvents = async () => {
     try {
+<<<<<<< HEAD
       return await db.eventos.where('sincronizado').equals(0).toArray(); // Devuelve los eventos pendientes
+=======
+    return await db.eventos.where('sincronizado').equals(0).toArray();
+>>>>>>> 4b1bdba920eb81a534bfebbd031c0d9427c7e22b
     } catch (error) {
       console.error('Error obteniendo eventos pendientes:', error); // Maneja errores al obtener eventos pendientes
       return []; // Devuelve un array vacío en caso de error

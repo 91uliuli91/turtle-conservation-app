@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 // src/app/api/API_routes/campamentos/route.js
+=======
+export const dynamic = 'force-static';
+export const revalidate = 0;
+
+>>>>>>> 4b1bdba920eb81a534bfebbd031c0d9427c7e22b
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/app/lib/db';
 
