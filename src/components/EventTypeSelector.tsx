@@ -44,6 +44,7 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     <div className="flex flex-col items-center animate-fadeInUp">
       <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50 w-full max-w-md">
         <div className="mb-8 text-center">
+          
           <h2 className="text-3xl font-light text-foreground mb-4 text-balance">Nuevo Registro</h2>
           <p className="text-muted-foreground text-lg text-pretty">¿Qué tipo de evento registras?</p>
         </div>

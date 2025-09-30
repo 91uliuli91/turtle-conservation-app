@@ -928,7 +928,6 @@ body {
 @media (max-width: 768px) {
   .turtletrack-dashboard {
     padding: 20px;
-    margin: 0;
   }
   
   .turtletrack-header {
