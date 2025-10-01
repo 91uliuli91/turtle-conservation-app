@@ -1,8 +1,7 @@
 // src/components/EventTypeSelector.tsx
 
-//Este componente permite seleccionar uno de los tres tipos de eventos (Arqueo, Intento, Anidación),
+// Este componente permite seleccionar uno de los tres tipos de eventos (Arqueo, Intento, Anidación),
 // mostrando un diseño interactivo y visualmente atractivo, con un icono y descripción de cada tipo de evento.
-// EventTypeSelector.tsx - Versión actualizada con bordes más redondeados
 "use client"
 import '../app/globals.css';
 
@@ -15,7 +14,12 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "arqueo",
       name: "Arqueo",
-      icon: "🐢",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
       description: "Registro de tortuga avistada",
       gradient: "gradient-emerald-teal",
       bgColor: "from-emerald-500/10 to-teal-500/10",
@@ -24,7 +28,11 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "intento",
       name: "Intento",
-      icon: "🏖️",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      ),
       description: "Intento de anidación",
       gradient: "gradient-purple-pink",
       bgColor: "from-purple-500/10 to-pink-500/10",
@@ -33,7 +41,11 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "anidacion",
       name: "Anidación",
-      icon: "🥚",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
       description: "Nido con huevos",
       gradient: "gradient-blue-cyan",
       bgColor: "from-blue-500/10 to-cyan-500/10",
@@ -45,7 +57,6 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     <div className="flex flex-col items-center animate-fadeInUp">
       <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50 w-full max-w-md">
         <div className="mb-8 text-center">
-          
           <h2 className="text-3xl font-light text-foreground mb-2 text-balance">Nuevo Registro</h2>
           <p className="text-muted-foreground text-lg text-pretty">¿Qué tipo de evento registras?</p>
         </div>
@@ -62,8 +73,10 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="flex items-center space-x-5">
-                <div className="w-16 h-16 rounded-2xl bg-card shadow-lg flex items-center justify-center text-2xl border border-border/50 group-hover:scale-110 transition-transform duration-300">
-                  {event.icon}
+                <div className="w-16 h-16 rounded-2xl bg-card shadow-lg flex items-center justify-center border border-border/50 group-hover:scale-110 transition-transform duration-300">
+                  <div className="text-foreground group-hover:text-primary transition-colors duration-300">
+                    {event.icon}
+                  </div>
                 </div>
 
                 <div className="text-left flex-1 m-0">
@@ -83,7 +96,7 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
           ))}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-border/30 rounded-full">
+        <div className="mt-8 pt-6 border-t border-border/30">
           <p className="text-center text-xs text-muted-foreground tracking-wide">
             SELECCIONA UNA OPCIÓN PARA CONTINUAR
           </p>

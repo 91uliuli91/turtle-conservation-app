@@ -228,10 +228,10 @@ export default function WizardForm() {
             </div>
             <div className="flex justify-between items-start mb-8">
               <div className="space-y-4 ">
-                <h1 className="text-3xl sm:text-5xl font-bold text-balance bg-gradient-to-r from-primary to-primary/100 bg-clip-text text-transparent rounded-none pt-4 ">
+                <h1 className="text-2xl sm:text-5xl font-bold text-balance bg-gradient-to-r from-primary to-primary/100 bg-clip-text text-transparent rounded-none pt-4 ">
                   {saveStatus === "saved" && showSuccessOptions ? "Evento Guardado" : "Registro de Evento"}
                 </h1>
-                <p className="text-muted-foreground text-xl text-pretty leading-relaxed">
+                <p className="text-muted-foreground text-lg text-pretty leading-relaxed">
                   {saveStatus === "saved" && showSuccessOptions 
                     ? "¿Qué te gustaría hacer ahora?" 
                     : "Complete la información del evento de conservación"}
@@ -277,15 +277,56 @@ export default function WizardForm() {
                     </div>
                   )}
                 </div>
-
                 {/* Modern step indicators - CON ANIMACIONES MEJORADAS */}
                 <div className="flex justify-between items-center">
                 {[
-                  { step: 1, label: "Tipo", icon: "🐢" },
-                  { step: 2, label: "Ubicación", icon: "📍" },
-                  { step: 3, label: "Detalles", icon: "📝" },
-                  { step: 4, label: "Fotos", icon: "📸" },
-                  { step: 5, label: "Resumen", icon: "✅" },
+                  { 
+                    step: 1, 
+                    label: "Tipo", 
+                    icon: (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )
+                  },
+                  { 
+                    step: 2, 
+                    label: "Ubicación", 
+                    icon: (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )
+                  },
+                  { 
+                    step: 3, 
+                    label: "Detalles", 
+                    icon: (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    )
+                  },
+                  { 
+                    step: 4, 
+                    label: "Fotos", 
+                    icon: (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    )
+                  },
+                  { 
+                    step: 5, 
+                    label: "Resumen", 
+                    icon: (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    )
+                  },
                 ].map(({ step, label, icon }) => {
                   const isCompleted = currentStep > step;
                   const isCurrent = currentStep === step;
@@ -296,15 +337,15 @@ export default function WizardForm() {
                       <div
                         className={`relative w-8 h-8 rounded-2xl flex items-center justify-center text-lg transition-all duration-700 ${
                           isCompleted
-                            ? "gradient-purple-blue text-white shadow-lg shadow-primary/25 scale-110 animate-check-in" // Completado con animación
+                            ? "gradient-purple-blue text-white shadow-lg shadow-primary/25 scale-110 animate-check-in"
                             : isCurrent
-                            ? "bg-primary text-primary-foreground border-2 border-primary shadow-lg scale-110 animate-pulse" // Actual con pulso
-                            : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80 transition-all duration-300" // Futuro
+                            ? "bg-primary text-primary-foreground border-2 border-primary shadow-lg scale-110 animate-pulse"
+                            : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80 transition-all duration-300"
                         }`}
                       >
                         {isCompleted ? (
                           <div className="animate-check-in">
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                               <path
                                 fillRule="evenodd"
                                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -313,7 +354,7 @@ export default function WizardForm() {
                             </svg>
                           </div>
                         ) : isCurrent ? (
-                          <span className="font-bold text-sm animate-bounce-in">{step}</span>
+                          <span className="font-bold text-xs animate-bounce-in">{step}</span>
                         ) : (
                           <span className="opacity-70">{icon}</span>
                         )}
@@ -338,7 +379,6 @@ export default function WizardForm() {
           </div>
         </div>
       </div>
-
       <div className="px-2 pb-12 sm:px-8">
         <div className="max-w-2xl mx-auto">
           <div className="animate-fadeInUp">{renderCurrentStep()}</div>
@@ -360,7 +400,9 @@ export default function WizardForm() {
               >
                 {saveStatus === "saving" && (
                   <div className="flex items-center text-foreground">
-                    <div className="animate-spin rounded-full h-6 w-6 border-3 border-primary/20 border-t-primary mr-4"></div>
+                    <svg className="w-6 h-6 animate-spin mr-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
                     <span className="font-semibold text-lg">Guardando evento...</span>
                   </div>
                 )}
@@ -431,8 +473,10 @@ function SuccessOptions({ onAddNewEvent, onReturnToDashboard }: {
           style={{ animationDelay: "200ms" }}
         >
           <div className="flex items-center justify-center space-x-4">
-            <div className="w-12 h-12 bg-white/20 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
-              ➕
+            <div className="w-12 h-12 bg-white/20 flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
             </div>
             <div className="text-left">
               <div className="text-lg font-semibold">Agregar Nuevo Evento</div>
@@ -449,8 +493,10 @@ function SuccessOptions({ onAddNewEvent, onReturnToDashboard }: {
           style={{ animationDelay: "400ms" }}
         >
           <div className="flex items-center justify-center space-x-4">
-            <div className="w-12 h-12 bg-muted/50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
-              🏠
+            <div className="w-12 h-12 bg-muted/50 flex items-center justify-center rounded-xl group-hover:scale-110 transition-transform duration-300">
+              <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
             </div>
             <div className="text-left">
               <div className="text-lg font-semibold">Volver al Inicio</div>
@@ -466,5 +512,5 @@ function SuccessOptions({ onAddNewEvent, onReturnToDashboard }: {
       </div>
     </div>
   );
-  }
+}
   
