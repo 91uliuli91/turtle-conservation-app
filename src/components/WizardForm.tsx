@@ -1,6 +1,5 @@
 // src/components/WizardForm.tsx
 "use client"
-
 import { useState, useEffect } from "react"
 import EventTypeSelector from "./EventTypeSelector"
 import LocationPicker from "./LocationPicker"
@@ -196,7 +195,7 @@ export default function WizardForm() {
       <div className="p-2 sm:p-8">
         <div className="max-w-2xl mx-auto">
           <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 mb-8 mt-2">
-            <div className="flex items-center gap-4 mb-2 justify-between ">
+            <div className="flex items-center gap-4 justify-between ">
               {/* Botón de regreso mejorado */}
               <button 
                 onClick={() => window.history.back()}
@@ -242,7 +241,7 @@ export default function WizardForm() {
 
             {saveStatus !== "saved" || !showSuccessOptions ? (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-bold text-muted-foreground tracking-wide">
                     Paso {currentStep} de 5
                   </span>
@@ -271,7 +270,7 @@ export default function WizardForm() {
                   {/* Indicador de porcentaje flotante */}
                   {progressPercentage > 0 && progressPercentage < 100 && (
                     <div 
-                      className="absolute top-1/2 transform -translate-y-1/2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-bold shadow-lg transition-all duration-1000 ease-out animate-float"
+                      className="absolute top-1/2 transform  bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-bold shadow-lg transition-all duration-1000 ease-out animate-float"
                       style={{ left: `calc(${progressPercentage}% - 20px)` }}
                     >
                       {Math.round(progressPercentage)}%
@@ -295,7 +294,7 @@ export default function WizardForm() {
                   return (
                     <div key={step} className="flex flex-col items-center space-y-3">
                       <div
-                        className={`relative w-12 h-12 rounded-2xl flex items-center justify-center text-lg transition-all duration-700 ${
+                        className={`relative w-8 h-8 rounded-2xl flex items-center justify-center text-lg transition-all duration-700 ${
                           isCompleted
                             ? "gradient-purple-blue text-white shadow-lg shadow-primary/25 scale-110 animate-check-in" // Completado con animación
                             : isCurrent
