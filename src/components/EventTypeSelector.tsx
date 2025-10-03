@@ -4,6 +4,10 @@
 // mostrando un diseño interactivo y visualmente atractivo, con un icono y descripción de cada tipo de evento.
 "use client"
 import '../app/globals.css';
+import AnidacionIcon from "@/components/icons/AnidacionIcon";
+import ArqueoIcon from "@/components/icons/AnidacionIcon";
+import IntentoIcon from "@/components/icons/AnidacionIcon";
+
 
 interface EventTypeSelectorProps {
   onSelect: (type: string) => void
@@ -14,12 +18,7 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "arqueo",
       name: "Arqueo",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      icon: <ArqueoIcon className="w-11 h-15 " />,
       description: "Registro de tortuga avistada",
       gradient: "gradient-emerald-teal",
       bgColor: "from-emerald-500/10 to-teal-500/10",
@@ -28,27 +27,19 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "intento",
       name: "Intento",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
+      icon: <IntentoIcon className="w-12 h-12" />, // hereda color actual
       description: "Intento de anidación",
-      gradient: "gradient-purple-pink",
       bgColor: "from-purple-500/10 to-pink-500/10",
+      gradient: "gradient-purple-pink",
       borderColor: "border-purple-500/20",
     },
     {
       id: "anidacion",
       name: "Anidación",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      icon: <AnidacionIcon className="w-12 h-12" />, // hereda color del contenedor
       description: "Nido con huevos",
-      gradient: "gradient-blue-cyan",
       bgColor: "from-blue-500/10 to-cyan-500/10",
+      gradient: "gradient-blue-cyan",
       borderColor: "border-blue-500/20",
     },
   ]

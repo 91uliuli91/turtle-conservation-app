@@ -7,6 +7,9 @@
 import type { Metadata } from "next"; // Importa el tipo de Metadata de Next.js para la configuración de metadatos
 import { Geist, Geist_Mono } from "next/font/google"; // Importa las fuentes de Google Geist y Geist_Mono
 import "./globals.css"; // Importa los estilos globales de la aplicación
+// donde lo uses (Navbar, layout, etc.)
+import LogoTortuga from "@/components/icons/LogoTortuga";
+import LogoTortugaWordmark from "@/components/icons/LogoTortugaWordmark";
 
 // Configuración de la fuente Geist (sans-serif) con una variable CSS para uso global
 const geistSans = Geist({
@@ -37,6 +40,9 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/uber-move-text" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
       </head>
+      <header className="p-4">
+          <LogoTortugaWordmark className="w-12 h-8 text-emerald-600" />
+        </header>
       <body className={`${geistSans.variable} ${geistMono.variable} font-uber-move`}>
         {children}
       </body>
