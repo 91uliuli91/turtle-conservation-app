@@ -5,8 +5,8 @@
 "use client"
 import '../app/globals.css';
 import AnidacionIcon from "@/components/icons/AnidacionIcon";
-import ArqueoIcon from "@/components/icons/AnidacionIcon";
-import IntentoIcon from "@/components/icons/AnidacionIcon";
+import ArqueoIcon from "@/components/icons/IntentoIcon";
+import IntentoIcon from "@/components/icons/ArqueoIcon";
 
 
 interface EventTypeSelectorProps {
