@@ -1,4 +1,4 @@
-// src/components/WizardForm.tsx
+// src/components/WizardForm.tsx - VERSIÓN CORREGIDA
 "use client"
 import { useState, useEffect } from "react"
 import EventTypeSelector from "./EventTypeSelector"
@@ -32,9 +32,8 @@ export default function WizardForm() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
   const [showSuccessOptions, setShowSuccessOptions] = useState(false)
-  
-  // ⭐⭐⭐ NUEVO ESTADO PARA ANIMACIÓN ⭐⭐⭐
   const [isProgressAnimating, setIsProgressAnimating] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
   const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline()
 
@@ -50,7 +49,6 @@ export default function WizardForm() {
     let syncInterval: NodeJS.Timeout
 
     if (isOnline && pendingSyncs > 0) {
-      // Intentar sincronizar cada 30 segundos mientras haya eventos pendientes
       syncInterval = setInterval(() => {
         syncPendingEvents().catch(console.error)
       }, 30000)
@@ -61,12 +59,24 @@ export default function WizardForm() {
     }
   }, [isOnline, pendingSyncs, syncPendingEvents])
 
-  // ⭐⭐⭐ NUEVO EFECTO PARA ANIMACIÓN DE BARRA ⭐⭐⭐
+  // Efecto para animación de barra
   useEffect(() => {
     setIsProgressAnimating(true);
     const timer = setTimeout(() => setIsProgressAnimating(false), 500);
     return () => clearTimeout(timer);
   }, [currentStep])
+
+  // Efecto para manejar el scroll - CON LÓGICA MEJORADA
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      // Cambiar a true solo cuando el scroll sea significativo
+      setIsScrolled(scrollTop > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -74,17 +84,13 @@ export default function WizardForm() {
 
     try {
       if (isOnline) {
-        // Guardar online
         console.log("Guardando online:", eventData)
         await new Promise((resolve) => setTimeout(resolve, 2000))
         setSaveStatus("saved")
-        // Mostrar opciones después de 1 segundo
         setTimeout(() => setShowSuccessOptions(true), 1000)
       } else {
-        // Guardar offline
         const id = await saveEventOffline(eventData)
         setSaveStatus("saved")
-        // Mostrar opciones después de 1 segundo
         setTimeout(() => setShowSuccessOptions(true), 1000)
       }
     } catch (error: any) {
@@ -97,7 +103,6 @@ export default function WizardForm() {
   }
 
   const handleAddNewEvent = () => {
-    // Resetear el formulario para nuevo evento
     setEventData({
       type: "",
       location: { lat: 0, lon: 0 },
@@ -111,20 +116,113 @@ export default function WizardForm() {
   }
 
   const handleReturnToDashboard = () => {
-    // Redirigir al dashboard
     window.location.href = "/"
   }
 
-  // Calcular el progreso correctamente
   const calculateProgress = () => {
-    // El progreso debe ser 0% en el paso 1 (selección de tipo)
-    // y avanzar 25% por cada paso completado
     if (currentStep === 1) return 0;
     return ((currentStep - 1) / 4) * 100;
   }
 
+  // Componente para el header compacto fijo - SOLO SE MUESTRA AL HACER SCROLL
+  const CompactHeader = () => (
+    <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl border-b border-border/50 bg-background/95 py-3 shadow-lg ${
+      isScrolled ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full'
+    }`}>
+      <div className="max-w-2xl mx-auto px-4 sm:px-8">
+        <div className="flex items-center justify-between">
+          {/* Botón de regreso compacto */}
+          <button 
+            onClick={() => window.history.back()}
+            className="flex items-center space-x-2 px-3 py-2 bg-secondary hover:bg-accent text-secondary-foreground 
+                    border border-border transition-all duration-300 hover:scale-105 rounded-xl text-sm"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="font-semibold">Volver</span>
+          </button>
+          
+          {/* Indicadores de pasos compactos */}
+          <div className="flex items-center space-x-3">
+            {[1, 2, 3, 4, 5].map((step) => {
+              const isCompleted = currentStep > step;
+              const isCurrent = currentStep === step;
+              
+              return (
+                <div key={step} className="flex flex-col items-center">
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
+                      isCompleted
+                        ? "gradient-purple-blue text-white shadow-md"
+                        : isCurrent
+                        ? "bg-primary text-primary-foreground border-2 border-primary shadow-md"
+                        : "bg-muted/40 text-muted-foreground border border-border"
+                    }`}
+                  >
+                    {isCompleted ? (
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    ) : (
+                      <span>{step}</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Estado de conexión compacto */}
+          <div
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300 ${
+              isOnline
+                ? "bg-success/10 text-success border-success/30"
+                : "bg-destructive/10 text-destructive border-destructive/30"
+            }`}
+          >
+            <div className="flex items-center gap-2">  
+              <div
+                className={`w-2 h-2 rounded-full ${isOnline ? "bg-success" : "bg-destructive"} animate-pulse`}
+              ></div>
+              <span className="font-semibold">{isOnline ? "Online" : "Offline"}</span>
+              {pendingSyncs > 0 && (
+                <span className="bg-muted/80 px-1.5 py-0.5 rounded text-xs">{pendingSyncs}</span>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* Barra de progreso compacta */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-medium text-muted-foreground">
+              Paso {currentStep} de 5
+            </span>
+            <span className="text-xs font-medium text-primary">
+              {Math.round(calculateProgress())}%
+            </span>
+          </div>
+          <div className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-1.5 rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${
+                isProgressAnimating ? 'animate-wave' : ''
+              }`}
+              style={{ width: `${calculateProgress()}%` }}
+            >
+              <div className="absolute inset-0 gradient-purple-blue"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderCurrentStep = () => {
-    // Si estamos en estado de éxito y mostrando opciones, renderizar el componente de éxito
     if (saveStatus === "saved" && showSuccessOptions) {
       return (
         <div className="animate-fadeInUp">
@@ -188,203 +286,207 @@ export default function WizardForm() {
     }
   }
 
-  const progressPercentage = calculateProgress();
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="p-2 sm:p-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-card rounded-3xl p-8 shadow-lg border border-border/50 mb-8 mt-2">
-            <div className="flex items-center gap-4 justify-between ">
-              {/* Botón de regreso mejorado */}
-              <button 
-                onClick={() => window.history.back()}
-                className="flex items-center space-x-2 px-4 py-3 bg-secondary hover:bg-accent text-secondary-foreground 
-                        border border-border transition-all duration-300 hover:scale-105 hover:shadow-lg 
-                        cursor-pointer group"
-              >
-                <svg className="w-4 h-4 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="font-bold">Volver</span>
-              </button>
-              <div
-                className={`px-4 py-3 rounded-2xl text-sm font-medium border transition-all duration-300 backdrop-blur-sm ${
-                  isOnline
-                    ? "bg-success/10 text-success border-success/30 shadow-lg shadow-success/5"
-                    : "bg-destructive/10 text-destructive border-destructive/30 shadow-lg shadow-destructive/5"
-                }`}
-              >
-                <div className="flex items-center gap-3">  
-                  <div
-                    className={`w-3 h-3 rounded-full ${isOnline ? "bg-success" : "bg-destructive"} animate-pulse`}
-                  ></div>
-                  <span className="font-semibold">{isOnline ? "Online" : "Offline"}</span>
-                  {pendingSyncs > 0 && (
-                    <span className="bg-muted px-3 py-1 rounded-full text-xs font-medium">{pendingSyncs}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between items-start mb-8">
-              <div className="space-y-4 ">
-                <h1 className="text-2xl sm:text-5xl font-bold text-balance bg-gradient-to-r from-primary to-primary/100 bg-clip-text text-transparent rounded-none pt-4 ">
-                  {saveStatus === "saved" && showSuccessOptions ? "Evento Guardado" : "Registro de Evento"}
-                </h1>
-                <p className="text-muted-foreground text-lg text-pretty leading-relaxed">
-                  {saveStatus === "saved" && showSuccessOptions 
-                    ? "¿Qué te gustaría hacer ahora?" 
-                    : "Complete la información del evento de conservación"}
-                </p>
-              </div>
-            </div>
-
-            {saveStatus !== "saved" || !showSuccessOptions ? (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-bold text-muted-foreground tracking-wide">
-                    Paso {currentStep} de 5
-                  </span>
-                </div>
-
-                <div className="relative">
-                  <div className="w-full bg-muted/30 rounded-full h-3 overflow-hidden shadow-inner">
-                    {/* Barra de fondo con efecto de pulso sutil */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse-slow"></div>
-                    
-                    {/* Barra de progreso principal con animación de onda */}
+      {/* Header compacto fijo - SOLO VISIBLE AL HACER SCROLL */}
+      <CompactHeader />
+      
+      {/* Contenido principal */}
+      <div className="pt-8">
+        <div className="p-2 sm:p-8">
+          <div className="max-w-2xl mx-auto">
+            {/* Header expandido - SOLO VISIBLE SIN SCROLL */}
+            <div className={`bg-card rounded-3xl p-8 shadow-lg border border-border/50 mb-8 transition-all duration-500 ${
+              isScrolled ? 'opacity-0 -translate-y-4' : 'opacity-100 translate-y-0'
+            }`}>
+              <div className="flex items-center gap-4 justify-between">
+                <button 
+                  onClick={() => window.history.back()}
+                  className="flex items-center space-x-2 px-4 py-3 bg-secondary hover:bg-accent text-secondary-foreground 
+                          border border-border transition-all duration-300 hover:scale-105 hover:shadow-lg 
+                          cursor-pointer group rounded-xl"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="font-bold">Volver</span>
+                </button>
+                
+                <div
+                  className={`px-4 py-3 rounded-2xl text-sm font-medium border transition-all duration-300 backdrop-blur-sm ${
+                    isOnline
+                      ? "bg-success/10 text-success border-success/30 shadow-lg shadow-success/5"
+                      : "bg-destructive/10 text-destructive border-destructive/30 shadow-lg shadow-destructive/5"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">  
                     <div
-                      className={`h-3 rounded-full transition-all duration-1000 ease-out shadow-lg relative overflow-hidden ${
-                        isProgressAnimating ? 'animate-wave' : ''
-                      }`}
-                      style={{ width: `${progressPercentage}%` }}
-                    >
-                      {/* Gradiente principal */}
-                      <div className="absolute inset-0 gradient-purple-blue"></div>
-                      
-                      {/* Efecto de brillo animado */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine"></div>
-                    </div>
+                      className={`w-3 h-3 rounded-full ${isOnline ? "bg-success" : "bg-destructive"} animate-pulse`}
+                    ></div>
+                    <span className="font-semibold">{isOnline ? "Online" : "Offline"}</span>
+                    {pendingSyncs > 0 && (
+                      <span className="bg-muted px-3 py-1 rounded-full text-xs font-medium">{pendingSyncs}</span>
+                    )}
                   </div>
-                  
-                  {/* Indicador de porcentaje flotante */}
-                  {progressPercentage > 0 && progressPercentage < 100 && (
-                    <div 
-                      className="absolute top-1/2 transform  bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-bold shadow-lg transition-all duration-1000 ease-out animate-float"
-                      style={{ left: `calc(${progressPercentage}% - 20px)` }}
-                    >
-                      {Math.round(progressPercentage)}%
-                    </div>
-                  )}
-                </div>
-                {/* Modern step indicators - CON ANIMACIONES MEJORADAS */}
-                <div className="flex justify-between items-center">
-                {[
-                  { 
-                    step: 1, 
-                    label: "Tipo", 
-                    icon: (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    )
-                  },
-                  { 
-                    step: 2, 
-                    label: "Ubicación", 
-                    icon: (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )
-                  },
-                  { 
-                    step: 3, 
-                    label: "Detalles", 
-                    icon: (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    )
-                  },
-                  { 
-                    step: 4, 
-                    label: "Fotos", 
-                    icon: (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    )
-                  },
-                  { 
-                    step: 5, 
-                    label: "Resumen", 
-                    icon: (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    )
-                  },
-                ].map(({ step, label, icon }) => {
-                  const isCompleted = currentStep > step;
-                  const isCurrent = currentStep === step;
-                  const isFuture = currentStep < step;
-
-                  return (
-                    <div key={step} className="flex flex-col items-center space-y-3">
-                      <div
-                        className={`relative w-8 h-8 rounded-2xl flex items-center justify-center text-lg transition-all duration-700 ${
-                          isCompleted
-                            ? "gradient-purple-blue text-white shadow-lg shadow-primary/25 scale-110 animate-check-in"
-                            : isCurrent
-                            ? "bg-primary text-primary-foreground border-2 border-primary shadow-lg scale-110 animate-pulse"
-                            : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80 transition-all duration-300"
-                        }`}
-                      >
-                        {isCompleted ? (
-                          <div className="animate-check-in">
-                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                        ) : isCurrent ? (
-                          <span className="font-bold text-xs animate-bounce-in">{step}</span>
-                        ) : (
-                          <span className="opacity-70">{icon}</span>
-                        )}
-                      </div>
-                      <span
-                        className={`text-xs font-semibold transition-all duration-500 ${
-                          isCompleted
-                            ? "text-primary font-bold"
-                            : isCurrent
-                            ? "text-primary font-bold"
-                            : "text-muted-foreground opacity-70"
-                        }`}
-                      >
-                        {label.toUpperCase()}
-                      </span>
-                    </div>
-                  );
-                })}
                 </div>
               </div>
-            ) : null}
+              
+              <div className="flex justify-between items-start mb-8">
+                <div className="space-y-4">
+                  <h1 className="text-2xl sm:text-5xl font-bold text-balance bg-gradient-to-r from-primary to-primary/100 bg-clip-text text-transparent rounded-none pt-4">
+                    {saveStatus === "saved" && showSuccessOptions ? "Evento Guardado" : "Registro de Evento"}
+                  </h1>
+                  <p className="text-muted-foreground text-lg text-pretty leading-relaxed">
+                    {saveStatus === "saved" && showSuccessOptions 
+                      ? "¿Qué te gustaría hacer ahora?" 
+                      : "Complete la información del evento de conservación"}
+                  </p>
+                </div>
+              </div>
+
+              {saveStatus !== "saved" || !showSuccessOptions ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-bold text-muted-foreground tracking-wide">
+                      Paso {currentStep} de 5
+                    </span>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-muted/30 rounded-full h-3 overflow-hidden shadow-inner">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse-slow"></div>
+                      
+                      <div
+                        className={`h-3 rounded-full transition-all duration-1000 ease-out shadow-lg relative overflow-hidden ${
+                          isProgressAnimating ? 'animate-wave' : ''
+                        }`}
+                        style={{ width: `${calculateProgress()}%` }}
+                      >
+                        <div className="absolute inset-0 gradient-purple-blue"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine"></div>
+                      </div>
+                    </div>
+                    
+                    {calculateProgress() > 0 && calculateProgress() < 100 && (
+                      <div 
+                        className="absolute top-1/2 transform bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-bold shadow-lg transition-all duration-1000 ease-out animate-float"
+                        style={{ left: `calc(${calculateProgress()}% - 20px)` }}
+                      >
+                        {Math.round(calculateProgress())}%
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Indicadores de pasos detallados */}
+                  <div className="flex justify-between items-center">
+                    {[
+                      { 
+                        step: 1, 
+                        label: "Tipo", 
+                        icon: (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )
+                      },
+                      { 
+                        step: 2, 
+                        label: "Ubicación", 
+                        icon: (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        )
+                      },
+                      { 
+                        step: 3, 
+                        label: "Detalles", 
+                        icon: (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        )
+                      },
+                      { 
+                        step: 4, 
+                        label: "Fotos", 
+                        icon: (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        )
+                      },
+                      { 
+                        step: 5, 
+                        label: "Resumen", 
+                        icon: (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )
+                      },
+                    ].map(({ step, label, icon }) => {
+                      const isCompleted = currentStep > step;
+                      const isCurrent = currentStep === step;
+
+                      return (
+                        <div key={step} className="flex flex-col items-center space-y-3">
+                          <div
+                            className={`relative w-8 h-8 rounded-2xl flex items-center justify-center text-lg transition-all duration-700 ${
+                              isCompleted
+                                ? "gradient-purple-blue text-white shadow-lg shadow-primary/25 scale-110 animate-check-in"
+                                : isCurrent
+                                ? "bg-primary text-primary-foreground border-2 border-primary shadow-lg scale-110 animate-pulse"
+                                : "bg-muted/50 text-muted-foreground border border-border hover:bg-muted/80 transition-all duration-300"
+                            }`}
+                          >
+                            {isCompleted ? (
+                              <div className="animate-check-in">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                            ) : isCurrent ? (
+                              <span className="font-bold text-xs animate-bounce-in">{step}</span>
+                            ) : (
+                              <span className="opacity-70">{icon}</span>
+                            )}
+                          </div>
+                          <span
+                            className={`text-xs font-semibold transition-all duration-500 ${
+                              isCompleted
+                                ? "text-primary font-bold"
+                                : isCurrent
+                                ? "text-primary font-bold"
+                                : "text-muted-foreground opacity-70"
+                            }`}
+                          >
+                            {label.toUpperCase()}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        
+        <div className="px-2 pb-12 sm:px-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="animate-fadeInUp">{renderCurrentStep()}</div>
           </div>
         </div>
       </div>
-      <div className="px-2 pb-12 sm:px-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="animate-fadeInUp">{renderCurrentStep()}</div>
-        </div>
-      </div>
 
+      {/* Estado de guardado fijo en la parte inferior */}
       {saveStatus !== "idle" && !showSuccessOptions && (
         <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border/50 z-50">
           <div className="px-6 py-6">
