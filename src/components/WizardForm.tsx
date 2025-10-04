@@ -133,6 +133,7 @@ export default function WizardForm() {
       details: {},
       photos: [] as string[],
       observations: "",
+      environmentalData: null,
     })
     setCurrentStep(1)
     setSaveStatus("idle")
@@ -526,8 +527,17 @@ export default function WizardForm() {
         </div>
       )
     }
-
-    switch (currentStep) {
+    // Función helper para verificar ubicación válida
+    const hasValidLocation = (location: any): boolean => {
+      return location && 
+            typeof location.lat === 'number' && 
+            typeof location.lon === 'number' &&
+            !isNaN(location.lat) && 
+            !isNaN(location.lon) &&
+            location.lat !== 0 && 
+            location.lon !== 0;
+    };
+        switch (currentStep) {
       case 1:
         return (
           <EventTypeSelector
@@ -547,13 +557,8 @@ export default function WizardForm() {
       case 3:
         return (
           <div>
-            {/* Mostrar datos ambientales en el paso de detalles */}
-            {eventData.location.lat !== 0 && eventData.location.lon !== 0 && (
-              <EnvironmentalDataPanel 
-                lat={eventData.location.lat} 
-                lon={eventData.location.lon} 
-              />
-            )}
+            {/* EnvironmentalDataPanel ahora usa geolocalización automática */}
+            <EnvironmentalDataPanel />
             <EventDetails
               eventType={eventData.type}
               onDetailsChange={(details) => updateEventData("details", details)}
@@ -565,14 +570,8 @@ export default function WizardForm() {
       case 4:
         return (
           <div>
-            {/* Mostrar datos ambientales compactos en el paso de fotos */}
-            {eventData.location.lat !== 0 && eventData.location.lon !== 0 && (
-              <EnvironmentalDataPanel 
-                lat={eventData.location.lat} 
-                lon={eventData.location.lon}
-                compact={true}
-              />
-            )}
+            {/* EnvironmentalDataPanel ahora usa geolocalización automática */}
+            <EnvironmentalDataPanel compact={true} />
             <PhotoStep
               onPhotosChange={(photos) => updateEventData("photos", photos)}
               onObservationsChange={(observations) => updateEventData("observations", observations)}
