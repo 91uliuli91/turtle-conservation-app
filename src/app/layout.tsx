@@ -23,6 +23,19 @@ export const metadata: Metadata = {
   description: "Sistema de gestión para conservación de tortugas marinas",
 };
 
+// Script para limpiar atributos antes de que React hidrate
+const cleanupScript = `
+  // Limpiar atributos de extensiones inmediatamente
+  if (typeof window !== 'undefined') {
+    document.body.removeAttribute("cz-shortcut-listen");
+    document.body.removeAttribute("g_editable");
+    document.body.removeAttribute("contenteditable");
+    document.body.removeAttribute("data-gramm");
+    document.body.removeAttribute("data-gramm_editor");
+    document.body.removeAttribute("data-enable-grammarly");
+  }
+`;
+
 export default function RootLayout({
   children,
 }: {
@@ -33,6 +46,7 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/uber-move-text" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <script dangerouslySetInnerHTML={{ __html: cleanupScript }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} font-uber-move`}>
         {/* Envuelve todo el contenido con ClientBodyWrapper */}
