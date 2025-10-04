@@ -105,6 +105,39 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
           </div>
         )}
 
+      {/* Datos Ambientales */}
+      {eventData.environmentalData && (
+        <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-2xl p-6 mb-6 border border-cyan-500/20">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+              <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-foreground">Condiciones Ambientales</h3>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex justify-between items-center py-2 border-b border-border/30">
+              <span className="text-muted-foreground font-medium">Temperatura:</span>
+              <span className="font-semibold text-foreground">{eventData.environmentalData.weather.temperature}°C</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border/30">
+              <span className="text-muted-foreground font-medium">Humedad:</span>
+              <span className="font-semibold text-foreground">{eventData.environmentalData.weather.humidity}%</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border/30">
+              <span className="text-muted-foreground font-medium">Marea:</span>
+              <span className="font-semibold text-foreground">{eventData.environmentalData.tide.tideHeight.toFixed(1)}m</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-border/30">
+              <span className="text-muted-foreground font-medium">Fase Lunar:</span>
+              <span className="font-semibold text-foreground">{eventData.environmentalData.moonPhase.phase}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
         {/* Observaciones */}
         {eventData.observations && (
           <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 mb-6 border border-purple-500/20">

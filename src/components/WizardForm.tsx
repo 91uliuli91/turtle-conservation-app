@@ -1,4 +1,4 @@
-// src/components/WizardForm.tsx - VERSIÓN CON BARRA COMPACTA REDONDEADA
+// src/components/WizardForm.tsx - VERSIÓN ACTUALIZADA CON DATOS AMBIENTALES
 "use client"
 import { useState, useEffect } from "react"
 import EventTypeSelector from "./EventTypeSelector"
@@ -6,6 +6,7 @@ import LocationPicker from "./LocationPicker"
 import EventDetails from "./EventDetails"
 import PhotoStep from "./PhotoStep"
 import SummaryStep from "./SummaryStep"
+import EnvironmentalDataPanel from "./EnvironmentalDataPanel"
 
 import '../app/globals.css';
 
@@ -28,6 +29,7 @@ export default function WizardForm() {
     details: {},
     photos: [] as string[],
     observations: "",
+    environmentalData: null as any // Nuevo campo para datos ambientales
   })
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
@@ -44,6 +46,23 @@ export default function WizardForm() {
   const updateEventData = (field: string, value: any) => {
     setEventData((prev) => ({ ...prev, [field]: value }))
   }
+
+  // Obtener datos ambientales cuando se confirma la ubicación
+  const handleLocationConfirm = async (lat: number, lon: number) => {
+    updateEventData("location", { lat, lon })
+    
+    // Obtener datos ambientales para esta ubicación
+    try {
+      const { weatherService } = await import('@/services/weatherService')
+      const environmentalData = await weatherService.getEnvironmentalData(lat, lon)
+      updateEventData("environmentalData", environmentalData)
+    } catch (error) {
+      console.warn("No se pudieron obtener datos ambientales:", error)
+    }
+    
+    nextStep()
+  }
+
 
   // Obtener altura del header después del renderizado
   useEffect(() => {
@@ -496,8 +515,6 @@ export default function WizardForm() {
       </>
     );
   };
-
-  // ... (el resto del código se mantiene igual)
   const renderCurrentStep = () => {
     if (saveStatus === "saved" && showSuccessOptions) {
       return (
@@ -523,30 +540,46 @@ export default function WizardForm() {
       case 2:
         return (
           <LocationPicker
-            onLocationConfirm={(lat, lon) => {
-              updateEventData("location", { lat, lon })
-              nextStep()
-            }}
+            onLocationConfirm={handleLocationConfirm}
             onBack={prevStep}
           />
         )
       case 3:
         return (
-          <EventDetails
-            eventType={eventData.type}
-            onDetailsChange={(details) => updateEventData("details", details)}
-            onBack={prevStep}
-            onNext={nextStep}
-          />
+          <div>
+            {/* Mostrar datos ambientales en el paso de detalles */}
+            {eventData.location.lat !== 0 && eventData.location.lon !== 0 && (
+              <EnvironmentalDataPanel 
+                lat={eventData.location.lat} 
+                lon={eventData.location.lon} 
+              />
+            )}
+            <EventDetails
+              eventType={eventData.type}
+              onDetailsChange={(details) => updateEventData("details", details)}
+              onBack={prevStep}
+              onNext={nextStep}
+            />
+          </div>
         )
       case 4:
         return (
-          <PhotoStep
-            onPhotosChange={(photos) => updateEventData("photos", photos)}
-            onObservationsChange={(observations) => updateEventData("observations", observations)}
-            onBack={prevStep}
-            onNext={nextStep}
-          />
+          <div>
+            {/* Mostrar datos ambientales compactos en el paso de fotos */}
+            {eventData.location.lat !== 0 && eventData.location.lon !== 0 && (
+              <EnvironmentalDataPanel 
+                lat={eventData.location.lat} 
+                lon={eventData.location.lon}
+                compact={true}
+              />
+            )}
+            <PhotoStep
+              onPhotosChange={(photos) => updateEventData("photos", photos)}
+              onObservationsChange={(observations) => updateEventData("observations", observations)}
+              onBack={prevStep}
+              onNext={nextStep}
+            />
+          </div>
         )
       case 5:
         return (
