@@ -11,6 +11,17 @@ export interface DeviceLocation {
   error?: string;
 }
 
+const requestLocationPermission = async (): Promise<boolean> => {
+  if (!navigator.permissions) return true;
+  
+  try {
+    const result = await navigator.permissions.query({ name: 'geolocation' });
+    return result.state === 'granted';
+  } catch {
+    return true; // Fallback para navegadores que no soportan permissions API
+  }
+};
+
 export function useDeviceLocation() {
   const [location, setLocation] = useState<DeviceLocation | null>(null);
   const [loading, setLoading] = useState(true);

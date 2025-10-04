@@ -183,6 +183,21 @@ class WeatherService {
     };
   }
 
+  private cache = new Map<string, { data: any; timestamp: number }>();
+  private CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+  private getCacheKey(lat: number, lon: number, type: string): string {
+    return `${lat},${lon},${type}`;
+  }
+
+  private getFromCache(key: string): any | null {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+      return cached.data;
+    }
+    return null;
+  }
+
   // Calcular fase lunar CON PRECISIÓN (esto sí es confiable)
   getMoonPhase(): MoonPhaseData {
     const now = new Date();

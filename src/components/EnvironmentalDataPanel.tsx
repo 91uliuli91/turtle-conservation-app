@@ -6,7 +6,18 @@ import { useEnvironmentalData } from '@/hooks/useEnvironmentalData';
 interface EnvironmentalDataPanelProps {
   compact?: boolean;
   showLocationInfo?: boolean;
-}
+} 
+const DataQualityIndicator = ({ source, accuracy }: { source: string; accuracy: number }) => (
+  <div className="flex items-center gap-1 text-xs">
+    <div className={`w-2 h-2 rounded-full ${
+      accuracy > 80 ? 'bg-green-500' : 
+      accuracy > 60 ? 'bg-yellow-500' : 'bg-red-500'
+    }`} />
+    <span className="text-muted-foreground">
+      {source} • {accuracy}% confianza
+    </span>
+  </div>
+);
 
 export default function EnvironmentalDataPanel({ 
   compact = false, 
