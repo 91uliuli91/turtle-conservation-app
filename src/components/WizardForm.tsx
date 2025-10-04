@@ -166,7 +166,7 @@ export default function WizardForm() {
       <>
         {/* Header Compacto - Aparece al final CON BORDES REDONDEADOS */}
         <div 
-          className="fixed top-4 left-4 right-4 z-50 transition-all duration-500 backdrop-blur-xl border border-border/50 bg-background/95 shadow-lg"
+          className="fixed top-4 left-4 right-4 z-50 transition-all duration-500 backdrop-blur-xl border border-border/50 bg-card-sidebar shadow-lg"
           style={{
             height: '70px',
             opacity: compactOpacity,
@@ -235,34 +235,6 @@ export default function WizardForm() {
                       {pendingSyncs}
                     </span>
                   )}
-                </div>
-              </div>
-            </div>
-            
-            {/* Barra de progreso compacta */}
-            <div className="mt-2" style={{ opacity: compactOpacity }}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Paso {currentStep} de 5
-                </span>
-                <span className="text-xs font-medium text-primary">
-                  {Math.round(calculateProgress())}%
-                </span>
-              </div>
-              <div 
-                className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden"
-                style={{ borderRadius: '8px' }} // Bordes redondeados para la barra de fondo
-              >
-                <div
-                  className={`h-1.5 rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${
-                    isProgressAnimating ? 'animate-wave' : ''
-                  }`}
-                  style={{ 
-                    width: `${calculateProgress()}%`,
-                    borderRadius: '8px' // Bordes redondeados para la barra de progreso
-                  }}
-                >
-                  <div className="absolute inset-0 gradient-purple-blue"></div>
                 </div>
               </div>
             </div>
