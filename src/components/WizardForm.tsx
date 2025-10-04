@@ -1,4 +1,4 @@
-// src/components/WizardForm.tsx - VERSIÓN CON PADDING FIJO
+// src/components/WizardForm.tsx - VERSIÓN CON BARRA COMPACTA REDONDEADA
 "use client"
 import { useState, useEffect } from "react"
 import EventTypeSelector from "./EventTypeSelector"
@@ -144,14 +144,15 @@ export default function WizardForm() {
 
     return (
       <>
-        {/* Header Compacto - Aparece al final */}
+        {/* Header Compacto - Aparece al final CON BORDES REDONDEADOS */}
         <div 
-          className="fixed top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-xl border-b border-border/50 bg-background/95 shadow-lg"
+          className="fixed top-4 left-4 right-4 z-50 transition-all duration-500 backdrop-blur-xl border border-border/50 bg-background/95 shadow-lg"
           style={{
             height: '70px',
             opacity: compactOpacity,
             transform: `translateY(${compactOpacity * -10}px)`,
-            padding: '12px 0'
+            padding: '12px 0',
+            borderRadius: '24px', // Bordes redondeados igual que el header expandido
           }}
         >
           <div className="max-w-2xl mx-auto px-4 sm:px-8 h-full">
@@ -197,7 +198,8 @@ export default function WizardForm() {
                 }`}
                 style={{
                   opacity: compactOpacity,
-                  transform: `scale(${0.9 + (compactOpacity * 0.1)})`
+                  transform: `scale(${0.9 + (compactOpacity * 0.1)})`,
+                  borderRadius: '12px', // Bordes redondeados consistentes
                 }}
               >
                 <div className="flex items-center gap-2">  
@@ -206,7 +208,12 @@ export default function WizardForm() {
                   ></div>
                   <span className="font-semibold">{isOnline ? "Online" : "Offline"}</span>
                   {pendingSyncs > 0 && (
-                    <span className="bg-muted/80 px-1.5 py-0.5 rounded text-xs">{pendingSyncs}</span>
+                    <span 
+                      className="bg-muted/80 px-1.5 py-0.5 rounded text-xs"
+                      style={{ borderRadius: '6px' }} // Bordes redondeados para el contador
+                    >
+                      {pendingSyncs}
+                    </span>
                   )}
                 </div>
               </div>
@@ -222,12 +229,18 @@ export default function WizardForm() {
                   {Math.round(calculateProgress())}%
                 </span>
               </div>
-              <div className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden">
+              <div 
+                className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden"
+                style={{ borderRadius: '8px' }} // Bordes redondeados para la barra de fondo
+              >
                 <div
                   className={`h-1.5 rounded-full transition-all duration-1000 ease-out relative overflow-hidden ${
                     isProgressAnimating ? 'animate-wave' : ''
                   }`}
-                  style={{ width: `${calculateProgress()}%` }}
+                  style={{ 
+                    width: `${calculateProgress()}%`,
+                    borderRadius: '8px' // Bordes redondeados para la barra de progreso
+                  }}
                 >
                   <div className="absolute inset-0 gradient-purple-blue"></div>
                 </div>
@@ -332,14 +345,20 @@ export default function WizardForm() {
                         opacity: 1 - (scrollProgress * 1.3)
                       }}
                     >
-                      <div className="w-full bg-muted/30 rounded-full h-3 overflow-hidden shadow-inner">
+                      <div 
+                        className="w-full bg-muted/30 rounded-full h-3 overflow-hidden shadow-inner"
+                        style={{ borderRadius: '12px' }}
+                      >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-pulse-slow"></div>
                         
                         <div
                           className={`h-3 rounded-full transition-all duration-1000 ease-out shadow-lg relative overflow-hidden ${
                             isProgressAnimating ? 'animate-wave' : ''
                           }`}
-                          style={{ width: `${calculateProgress()}%` }}
+                          style={{ 
+                            width: `${calculateProgress()}%`,
+                            borderRadius: '12px'
+                          }}
                         >
                           <div className="absolute inset-0 gradient-purple-blue"></div>
                           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shine"></div>
@@ -351,7 +370,8 @@ export default function WizardForm() {
                           className="absolute top-1/2 transform bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-bold shadow-lg transition-all duration-1000 ease-out animate-float"
                           style={{ 
                             left: `calc(${calculateProgress()}% - 20px)`,
-                            opacity: 1 - (scrollProgress * 1.5)
+                            opacity: 1 - (scrollProgress * 1.5),
+                            borderRadius: '8px'
                           }}
                         >
                           {Math.round(calculateProgress())}%
@@ -477,6 +497,7 @@ export default function WizardForm() {
     );
   };
 
+  // ... (el resto del código se mantiene igual)
   const renderCurrentStep = () => {
     if (saveStatus === "saved" && showSuccessOptions) {
       return (
@@ -548,7 +569,7 @@ export default function WizardForm() {
       
       {/* Contenido principal con padding fijo */}
       <div className="transition-all duration-500">
-        <div className="px-2 pb-12 sm:px-8">
+        <div className="px-2 pb-10 sm:px-8 sm:pb-12">
           <div className="max-w-2xl mx-auto">
             <div className="animate-fadeInUp">{renderCurrentStep()}</div>
           </div>
