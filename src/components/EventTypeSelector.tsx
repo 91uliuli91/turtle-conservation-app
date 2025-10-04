@@ -18,7 +18,7 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "arqueo",
       name: "Arqueo",
-      icon: <ArqueoIcon className="w-11 h-15 " />,
+      icon: <IntentoIcon className="w-11 h-15 " />,
       description: "Registro de tortuga avistada",
       gradient: "gradient-emerald-teal",
       bgColor: "from-emerald-500/10 to-teal-500/10",
@@ -27,7 +27,7 @@ export default function EventTypeSelector({ onSelect }: EventTypeSelectorProps) 
     {
       id: "intento",
       name: "Intento",
-      icon: <IntentoIcon className="w-12 h-12" />, // hereda color actual
+      icon: <ArqueoIcon className="w-13 h-10" />, // hereda color actual
       description: "Intento de anidación",
       bgColor: "from-purple-500/10 to-pink-500/10",
       gradient: "gradient-purple-pink",
