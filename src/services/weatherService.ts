@@ -327,11 +327,11 @@ class WeatherService {
         }
       };
 
-      console.log('✅ Datos ambientales obtenidos (con estimación local):', result);
+      console.log('Datos ambientales obtenidos (con estimación local):', result);
       return result;
 
     } catch (error) {
-      console.error('❌ Error obteniendo datos ambientales:', error);
+      console.error('Error obteniendo datos ambientales:', error);
       throw error;
     }
   }
