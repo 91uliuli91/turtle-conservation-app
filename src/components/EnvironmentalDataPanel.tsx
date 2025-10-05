@@ -1,4 +1,3 @@
-// src/components/EnvironmentalDataPanel.tsx - VERSIÓN CON GEOLOCALIZACIÓN
 "use client"
 
 import { useEnvironmentalData } from '@/hooks/useEnvironmentalData';
@@ -6,18 +5,7 @@ import { useEnvironmentalData } from '@/hooks/useEnvironmentalData';
 interface EnvironmentalDataPanelProps {
   compact?: boolean;
   showLocationInfo?: boolean;
-} 
-const DataQualityIndicator = ({ source, accuracy }: { source: string; accuracy: number }) => (
-  <div className="flex items-center gap-1 text-xs">
-    <div className={`w-2 h-2 rounded-full ${
-      accuracy > 80 ? 'bg-green-500' : 
-      accuracy > 60 ? 'bg-yellow-500' : 'bg-red-500'
-    }`} />
-    <span className="text-muted-foreground">
-      {source} • {accuracy}% confianza
-    </span>
-  </div>
-);
+}
 
 export default function EnvironmentalDataPanel({ 
   compact = false, 
@@ -141,7 +129,7 @@ export default function EnvironmentalDataPanel({
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Temperatura REAL */}
+        {/* Temperatura */}
         <div className="bg-gradient-to-br from-orange-500/10 to-red-500/10 rounded-xl p-3 border border-orange-500/20">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
@@ -159,7 +147,7 @@ export default function EnvironmentalDataPanel({
           </div>
         </div>
 
-        {/* Humedad REAL */}
+        {/* Humedad */}
         <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-3 border border-blue-500/20">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
@@ -177,7 +165,7 @@ export default function EnvironmentalDataPanel({
           </div>
         </div>
 
-        {/* Mareas REALES */}
+        {/* Mareas */}
         <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-3 border border-purple-500/20">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -200,7 +188,7 @@ export default function EnvironmentalDataPanel({
           </div>
         </div>
 
-        {/* Fase Lunar PRECISA */}
+        {/* Fase Lunar */}
         <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-3 border border-indigo-500/20">
           <div className="flex items-center gap-2 mb-1">
             <div className="text-2xl">{environmentalData.moonPhase.icon}</div>

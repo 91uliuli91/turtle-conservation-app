@@ -33,17 +33,10 @@ export default function TurtleTrackDashboard() {
         {/* Header simplificado - Sin botón de perfil */}
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-extrabold text-primary">TurtleTrack</h1>
-          {/* Espacio reservado para mantener el balance */}
-          <div className="w-12 h-12"></div>
+ 
         </header>
 
         <main>
-          {/* Título principal */}
-          <section className="mb-8 animate-slideInUp">
-            <h2 className="text-4xl font-extrabold text-foreground">TurtleTrack Cancún</h2>
-            <p className="text-muted-foreground mt-2 text-lg">Sistema de conservación de tortugas marinas</p>
-          </section>
-
           {/* Datos Ambientales BASADOS EN GEOLOCALIZACIÓN */}
           <EnvironmentalDataPanel />
 

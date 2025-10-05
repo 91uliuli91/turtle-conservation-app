@@ -1,4 +1,4 @@
-// src/components/WizardForm.tsx - VERSIÓN ACTUALIZADA CON DATOS AMBIENTALES
+// src/components/WizardForm.tsx - VERSIÓN CORREGIDA
 "use client"
 import { useState, useEffect } from "react"
 import EventTypeSelector from "./EventTypeSelector"
@@ -7,8 +7,22 @@ import EventDetails from "./EventDetails"
 import PhotoStep from "./PhotoStep"
 import SummaryStep from "./SummaryStep"
 import EnvironmentalDataPanel from "./EnvironmentalDataPanel"
-
+import { useOfflineAdvanced } from "../hooks/useOfflineAdvanced"
 import '../app/globals.css';
+
+// Definir la interfaz antes del componente
+interface EventDetailsType {
+  numeroHuevos?: number;
+  largoCaparazon?: number;
+  anchoCaparazon?: number;
+  observaciones?: string;
+  seColocoMarca?: boolean;
+  seRemarco?: boolean;
+  campamento_id?: number;
+  zona_playa?: 'A' | 'B' | 'C';
+  estacion_baliza?: string;
+  tortuga_id?: number;
+}
 
 // Mock hook for offline functionality
 const useOffline = () => ({
@@ -26,10 +40,10 @@ export default function WizardForm() {
   const [eventData, setEventData] = useState({
     type: "",
     location: { lat: 0, lon: 0 },
-    details: {},
+    details: {} as EventDetailsType, // Tipo específico aquí
     photos: [] as string[],
     observations: "",
-    environmentalData: null as any // Nuevo campo para datos ambientales
+    environmentalData: null as any
   })
   const [isSaving, setIsSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle")
@@ -37,8 +51,7 @@ export default function WizardForm() {
   const [isProgressAnimating, setIsProgressAnimating] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [headerHeight, setHeaderHeight] = useState(0)
-
-  const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline()
+  const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOfflineAdvanced();
 
   const nextStep = () => setCurrentStep((prev) => prev + 1)
   const prevStep = () => setCurrentStep((prev) => prev - 1)
@@ -62,7 +75,6 @@ export default function WizardForm() {
     
     nextStep()
   }
-
 
   // Obtener altura del header después del renderizado
   useEffect(() => {
@@ -91,8 +103,7 @@ export default function WizardForm() {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       
       // Calcular progreso basado en la altura del header
-      // La barra compacta aparece cuando el header expandido está a punto de desaparecer
-      const triggerPoint = headerHeight * 0.7; // 70% de la altura del header
+      const triggerPoint = headerHeight * 0.7;
       const progress = Math.min(Math.max((scrollTop - triggerPoint) / (headerHeight * 0.3), 0), 1);
       
       setScrollProgress(progress);
@@ -102,35 +113,129 @@ export default function WizardForm() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [headerHeight]);
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    setSaveStatus("saving")
+  // Función handleSave corregida
+const handleSave = async () => {
+  setIsSaving(true);
+  setSaveStatus("saving");
 
+  try {
+    const eventoData = {
+      tipo_evento: mapEventTypeToAPI(eventData.type),
+      fecha_hora: new Date().toISOString(),
+      coordenada_lat: eventData.location.lat,
+      coordenada_lon: eventData.location.lon,
+      personal_registro_id: 1,
+      observaciones: eventData.observations || '',
+      campamento_id: eventData.details?.campamento_id || null,
+      zona_playa: eventData.details?.zona_playa || null,
+      estacion_baliza: eventData.details?.estacion_baliza || null,
+      tortuga_id: eventData.details?.tortuga_id || null
+    };
+
+    console.log('📤 Enviando a /api/eventos:', eventoData);
+
+    const response = await fetch('/api/eventos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventoData),
+    });
+
+    // DEBUG: Ver la respuesta completa
+    const responseText = await response.text();
+    console.log('📥 Respuesta del servidor:', responseText.substring(0, 500));
+
+    // Verificar si es JSON válido
+    let result;
     try {
-      if (isOnline) {
-        console.log("Guardando online:", eventData)
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        setSaveStatus("saved")
-        setTimeout(() => setShowSuccessOptions(true), 1000)
-      } else {
-        const id = await saveEventOffline(eventData)
-        setSaveStatus("saved")
-        setTimeout(() => setShowSuccessOptions(true), 1000)
-      }
-    } catch (error: any) {
-      console.error("Error guardando evento:", error)
-      setSaveStatus("error")
-      alert(`❌ Error guardando el evento: ${error.message}. Por favor intenta nuevamente.`)
-    } finally {
-      setIsSaving(false)
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('❌ No es JSON válido:', responseText);
+      throw new Error(`El servidor devolvió HTML en lugar de JSON. ¿Existe la ruta /api/eventos?`);
     }
+
+    if (!response.ok) {
+      throw new Error(result.error || `Error ${response.status}: ${response.statusText}`);
+    }
+
+    console.log('✅ Evento guardado:', result);
+    setSaveStatus("saved");
+    setTimeout(() => setShowSuccessOptions(true), 1000);
+
+  } catch (error: any) {
+    console.error('❌ Error completo:', error);
+    setSaveStatus("error");
+    alert(`❌ Error: ${error.message}`);
+  } finally {
+    setIsSaving(false);
   }
+};
+
+  // Función auxiliar para mapear tipos de evento
+  const mapEventTypeToAPI = (type: string): 'Anidación' | 'Intento' | 'Arqueo' => {
+    const mapping: { [key: string]: 'Anidación' | 'Intento' | 'Arqueo' } = {
+      'anidacion': 'Anidación',
+      'intento': 'Intento', 
+      'arqueo': 'Arqueo'
+    };
+    return mapping[type] || 'Arqueo';
+  };
+
+  // Función para crear nido después del evento de anidación
+  const crearNido = async (eventoAnidacionId: number, numeroHuevos: number) => {
+    try {
+      const nidoData = {
+        evento_anidacion_id: eventoAnidacionId,
+        numero_huevos_recolectados: numeroHuevos,
+        trasladado_a_corral: false
+      };
+
+      const response = await fetch('/api/nidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nidoData),
+      });
+
+      if (!response.ok) throw new Error('Error creando nido');
+      
+      console.log('✅ Nido creado exitosamente');
+    } catch (error) {
+      console.error('❌ Error creando nido:', error);
+    }
+  };
+
+  // Función para crear observaciones de tortuga
+  const crearObservacionesTortuga = async (eventoId: number, detalles: EventDetailsType) => {
+    try {
+      const observacionData = {
+        evento_id: eventoId,
+        largo_caparazon_cm: detalles.largoCaparazon || null,
+        ancho_caparazon_cm: detalles.anchoCaparazon || null,
+        se_coloco_marca_nueva: detalles.seColocoMarca || false,
+        se_remarco: detalles.seRemarco || false,
+        path_fotos: eventData.photos?.length > 0 ? eventData.photos.join(',') : null
+      };
+
+      const response = await fetch('/api/observaciones', {
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(observacionData),
+      });
+
+      if (!response.ok) throw new Error('Error creando observaciones');
+      
+      console.log('✅ Observaciones de tortuga creadas exitosamente');
+    } catch (error) {
+      console.error('❌ Error creando observaciones:', error);
+    }
+  };
 
   const handleAddNewEvent = () => {
     setEventData({
       type: "",
       location: { lat: 0, lon: 0 },
-      details: {},
+      details: {} as EventDetailsType,
       photos: [] as string[],
       observations: "",
       environmentalData: null,
@@ -154,7 +259,6 @@ export default function WizardForm() {
     if (currentStep === step) return "current";
     return "upcoming";
   }
-
   // Componente para el header unificado con transición al final
   const UnifiedHeader = () => {
     const compactOpacity = Math.min(scrollProgress * 2, 1); // Aparece más rápido

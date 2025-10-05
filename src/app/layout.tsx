@@ -46,9 +46,27 @@ export default function RootLayout({
       <head>
         <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/uber-move-text" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-        <script dangerouslySetInnerHTML={{ __html: cleanupScript }} />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-uber-move`}>
+        {/* Script para limpiar atributos antes de la hidratación de React */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Limpiar atributos agregados por extensiones antes de la hidratación
+              document.addEventListener('DOMContentLoaded', function() {
+                // Remover atributos problemáticos agregados por extensiones
+                const cleanAttributes = ['cz-shortcut-listen'];
+                cleanAttributes.forEach(attr => {
+                  const elements = document.querySelectorAll('[' + attr + ']');
+                  elements.forEach(el => el.removeAttribute(attr));
+                });
+              });
+            `,
+          }}
+        />
+      </head>      
+      <body 
+        className={`${geistSans.variable} ${geistMono.variable} font-uber-move`}
+        suppressHydrationWarning
+      >
         {/* Envuelve todo el contenido con ClientBodyWrapper */}
         <ClientBodyWrapper>
           <header className="p-4">
