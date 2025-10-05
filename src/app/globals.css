@@ -191,9 +191,8 @@ body {
   background: var(--card);
 }
 .bg-card-sidebar {
-  background: var(--sidebar);
+  background: var(--card);
 }
-
 .bg-accent {
   background: var(--accent);
 }
