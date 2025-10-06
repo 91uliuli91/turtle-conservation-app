@@ -1,37 +1,86 @@
 // src/components/EventDetails.tsx
-//Este componente gestiona la entrada de detalles específicos según el tipo de evento (anidación, arqueo, intento), 
-// mostrando campos interactivos como sliders, botones y checkboxes. Los detalles se guardan en el estado y se actualizan de forma reactiva.
 'use client';
 
 import { useState } from 'react';
+import '../app/globals.css';
 
-// Definición de las propiedades que se pasan al componente EventDetails
 interface EventDetailsProps {
-  eventType: string; // Tipo de evento (anidación, arqueo, intento)
-  onDetailsChange: (details: any) => void; // Función para actualizar los detalles del evento en el formulario
-  onBack: () => void; // Función para retroceder al paso anterior
-  onNext: () => void; // Función para avanzar al siguiente paso
+  eventType: string;
+  onDetailsChange: (details: any) => void;
+  onBack: () => void;
+  onNext: () => void;
 }
 
 export default function EventDetails({ eventType, onDetailsChange, onBack, onNext }: EventDetailsProps) {
-  // Estado local para almacenar los detalles del evento
   const [details, setDetails] = useState({
-    numeroHuevos: 50, // Número de huevos (sólo para eventos de anidación)
-    largoCaparazon: 50, // Largo del caparazón (para arqueo y anidación)
-    anchoCaparazon: 50, // Ancho del caparazón (para arqueo y anidación)
-    observaciones: '', // Observaciones adicionales
-    seColocoMarca: false, // Checkbox para marca nueva (sólo para arqueo/anidación)
-    seRemarco: false // Checkbox para remarcado (sólo para arqueo/anidación)
+    numeroHuevos: 50,
+    largoCaparazon: 50,
+    anchoCaparazon: 50,
+    observaciones: '',
+    seColocoMarca: false,
+    seRemarco: false,
+    
+    // NUEVOS CAMPOS para la API
+    campamento_id: undefined as number | undefined,
+    zona_playa: undefined as 'A' | 'B' | 'C' | undefined,
+    estacion_baliza: '',
+    tortuga_id: undefined as number | undefined
   });
 
-  // Función para actualizar los detalles cuando el usuario cambia un campo
   const updateDetail = (field: string, value: any) => {
-    const newDetails = { ...details, [field]: value }; // Crea una copia del estado con el campo actualizado
-    setDetails(newDetails); // Actualiza el estado local
-    onDetailsChange(newDetails); // Llama a la función para actualizar los detalles en el formulario principal
+    const newDetails = { ...details, [field]: value };
+    setDetails(newDetails);
+    onDetailsChange(newDetails);
   };
 
-  // Renderiza los campos específicos para el evento de "anidación"
+  const renderCamposAdicionales = () => (
+    <div className="space-y-4 mt-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Campamento
+        </label>
+        <select 
+          value={details.campamento_id || ''}
+          onChange={(e) => updateDetail('campamento_id', e.target.value ? Number(e.target.value) : undefined)}
+          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-xl text-white"
+        >
+          <option value="">Seleccionar campamento</option>
+          <option value="1">Campamento Norte</option>
+          <option value="2">Campamento Sur</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Zona de Playa
+        </label>
+        <select 
+          value={details.zona_playa || ''}
+          onChange={(e) => updateDetail('zona_playa', e.target.value as 'A' | 'B' | 'C' | undefined)}
+          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-xl text-white"
+        >
+          <option value="">Seleccionar zona</option>
+          <option value="A">Zona A</option>
+          <option value="B">Zona B</option>
+          <option value="C">Zona C</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Estación/Baliza
+        </label>
+        <input
+          type="text"
+          value={details.estacion_baliza}
+          onChange={(e) => updateDetail('estacion_baliza', e.target.value)}
+          placeholder="Ej: EST-001"
+          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-xl text-white placeholder-gray-400"
+        />
+      </div>
+    </div>
+  );
+
   const renderAnidacionFields = () => (
     <div className="space-y-8">
       <div className="text-center">
@@ -68,10 +117,10 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
           className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer slider-thumb"
         />
       </div>
+      {renderCamposAdicionales()}
     </div>
   );
 
-  // Renderiza los campos de medición del caparazón (tanto largo como ancho)
   const renderMedicionesFields = () => (
     <div className="space-y-8">
       <div>
@@ -113,7 +162,6 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
       </div>
 
       <div className="space-y-4">
-        {/* Checkbox para "Se colocó marca nueva" */}
         <label className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl cursor-pointer
                         hover:bg-slate-800/70 transition-all duration-200">
           <input
@@ -126,7 +174,6 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
           <span className="text-gray-300 font-light">Se colocó marca nueva</span>
         </label>
         
-        {/* Checkbox para "Se remarcó" */}
         <label className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl cursor-pointer
                         hover:bg-slate-800/70 transition-all duration-200">
           <input
@@ -139,6 +186,7 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
           <span className="text-gray-300 font-light">Se remarcó</span>
         </label>
       </div>
+      {renderCamposAdicionales()}
     </div>
   );
 
@@ -151,7 +199,6 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
       </div>
       
       <div className="mb-8 flex-1">
-        {/* Renderiza los campos dependiendo del tipo de evento */}
         {eventType === 'anidacion' && renderAnidacionFields()}
         {(eventType === 'arqueo' || eventType === 'anidacion') && renderMedicionesFields()}
         {eventType === 'intento' && (
@@ -161,12 +208,12 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
               No se requieren detalles adicionales
               <br />para intentos de anidación
             </p>
+            {renderCamposAdicionales()}
           </div>
         )}
       </div>
 
       <div className="flex gap-3">
-        {/* Botón para retroceder al paso anterior */}
         <button
           onClick={onBack}
           className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl 
@@ -174,7 +221,6 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
         >
           ← Volver
         </button>
-        {/* Botón para avanzar al siguiente paso */}
         <button
           onClick={onNext}
           className="flex-1 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 

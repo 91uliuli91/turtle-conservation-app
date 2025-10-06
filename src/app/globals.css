@@ -1,8 +1,7 @@
 /* globals.css - Archivo CSS reorganizado y optimizado */
 
 /* ===== IMPORTS ===== */
-@import "tailwindcss"; /* Importa TailwindCSS para los estilos utility-first */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css'); /* Importa Font Awesome para los íconos */
+@import "tailwindcss";
 
 /* ===== VARIABLES CSS ===== */
 :root {
@@ -114,7 +113,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Uber Move Text', 'Uber Move', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Media query para detección automática de tema oscuro */
@@ -184,16 +183,6 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    letter-spacing: -0.01em;
-  }
-}
 
 /* ===== UTILITY CLASSES ===== */
 
@@ -201,7 +190,9 @@ body {
 .bg-card {
   background: var(--card);
 }
-
+.bg-card-sidebar {
+  background: var(--card);
+}
 .bg-accent {
   background: var(--accent);
 }
@@ -322,6 +313,35 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Animaciones para la página 404 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 @keyframes slideInLeft {
@@ -612,12 +632,6 @@ body {
 
 /* ===== TURTLETRACK DASHBOARD STYLES ===== */
 
-.turtletrack-dashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #4B8F8C 0%, #0F2A1F 100%);
-  color: var(--white);
-  padding: 40px;
-}
 
 /* Header */
 .turtletrack-header {
@@ -633,13 +647,6 @@ body {
   margin-bottom: 10px;
 }
 
-.turtletrack-title {
-  font-size: 30px;
-  font-weight: 700;
-  background: linear-gradient(90deg, #ffffff, var(--primary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
 
 /* Action Buttons Grid */
 .turtletrack-actions {

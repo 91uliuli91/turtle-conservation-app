@@ -1,46 +1,81 @@
 // src/app/layout.tsx
-
 //El componente layout.tsx configura los aspectos globales de la aplicación, como las fuentes, los metadatos y la hoja de estilos para los íconos. 
 // Este layout es utilizado en la aplicación Next.js  como el contenedor principal, asegurando que todas las páginas compartan una estructura común.
+// src/app/layout.tsx - VERSIÓN CORREGIDA
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import LogoTortugaWordmark from "@/components/icons/LogoTortugaWordmark";
+import ClientBodyWrapper from "@/components/ClientBodyWrapper"; // ← Importar
 
-
-import type { Metadata } from "next"; // Importa el tipo de Metadata de Next.js para la configuración de metadatos
-import { Geist, Geist_Mono } from "next/font/google"; // Importa las fuentes de Google Geist y Geist_Mono
-import "./globals.css"; // Importa los estilos globales de la aplicación
-
-// Configuración de la fuente Geist (sans-serif) con una variable CSS para uso global
 const geistSans = Geist({
-  variable: "--font-geist-sans", // Define una variable CSS para usar la fuente Geist en la aplicación
-  subsets: ["latin"], // Usa el subconjunto de caracteres latinos
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
-// Configuración de la fuente Geist_Mono (monoespaciada) con una variable CSS para uso global
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono", // Define una variable CSS para usar la fuente monoespaciada en la aplicación
-  subsets: ["latin"], // Usa el subconjunto de caracteres latinos
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
-// Definición de los metadatos de la página (título y descripción)
 export const metadata: Metadata = {
-  title: "TurtleTrack - Sistema de Conservación", // Título de la página
-  description: "Sistema de gestión para conservación de tortugas marinas", // Descripción de la página
+  title: "TurtleTrack - Sistema de Conservación",
+  description: "Sistema de gestión para conservación de tortugas marinas",
 };
+
+// Script para limpiar atributos antes de que React hidrate
+const cleanupScript = `
+  // Limpiar atributos de extensiones inmediatamente
+  if (typeof window !== 'undefined') {
+    document.body.removeAttribute("cz-shortcut-listen");
+    document.body.removeAttribute("g_editable");
+    document.body.removeAttribute("contenteditable");
+    document.body.removeAttribute("data-gramm");
+    document.body.removeAttribute("data-gramm_editor");
+    document.body.removeAttribute("data-enable-grammarly");
+  }
+`;
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode; // Los elementos hijos que se pasarán a este componente RootLayout
+  children: React.ReactNode
 }) {
   return (
-    <html lang="es" className="dark"> {/* El idioma de la página está configurado a español */}
+    <html lang="es" className="dark">
       <head>
-        {/* Enlace a la hoja de estilo de Font Awesome para los íconos */}
+        <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/uber-move-text" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}> {/* Aplica las fuentes Geist y Geist_Mono globalmente */}
-        {children} {/* Renderiza el contenido de la página */}
+        {/* Script para limpiar atributos antes de la hidratación de React */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Limpiar atributos agregados por extensiones antes de la hidratación
+              document.addEventListener('DOMContentLoaded', function() {
+                // Remover atributos problemáticos agregados por extensiones
+                const cleanAttributes = ['cz-shortcut-listen'];
+                cleanAttributes.forEach(attr => {
+                  const elements = document.querySelectorAll('[' + attr + ']');
+                  elements.forEach(el => el.removeAttribute(attr));
+                });
+              });
+            `,
+          }}
+        />
+      </head>      
+      <body 
+        className={`${geistSans.variable} ${geistMono.variable} font-uber-move`}
+        suppressHydrationWarning
+      >
+        {/* Envuelve todo el contenido con ClientBodyWrapper */}
+        <ClientBodyWrapper>
+          <header className="p-4">
+            <LogoTortugaWordmark className="w-12 h-8 text-emerald-600 bg-[#0A0A0A]" />
+          </header>
+          {children}
+        </ClientBodyWrapper>
+
       </body>
     </html>
-  );
+  )
 }
-

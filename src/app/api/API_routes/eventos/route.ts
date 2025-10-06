@@ -1,4 +1,7 @@
-export const dynamic = 'force-static';
+// src/app/api/API_routes/eventos/route.ts - VERSIÓN CORREGIDA
+// ❌ ELIMINADO: export const dynamic = 'force-static';
+// ✅ AGREGADO: Configuración correcta para rutas dinámicas
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -71,11 +74,13 @@ export async function GET(request: NextRequest) {
         count: result.rowCount
       });
     }
-  } catch (error) {
-    console.error('Error al obtener eventos:', error);
+  } catch (error: any) {
+    console.error('❌ Error al obtener eventos:', error);
+    console.error('Detalles del error:', error.message, error.stack);
     return NextResponse.json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }
@@ -83,6 +88,9 @@ export async function GET(request: NextRequest) {
 // POST - Crear nuevo evento
 export async function POST(request: NextRequest) {
   try {
+    const body = await request.json();
+    console.log('📥 Datos recibidos:', body);
+
     const {
       tipo_evento,
       fecha_hora,
@@ -94,7 +102,7 @@ export async function POST(request: NextRequest) {
       tortuga_id,
       personal_registro_id,
       observaciones
-    } = await request.json();
+    } = body;
 
     // Validaciones requeridas
     if (!tipo_evento || !fecha_hora || !personal_registro_id) {
@@ -109,7 +117,7 @@ export async function POST(request: NextRequest) {
     if (!tiposValidos.includes(tipo_evento)) {
       return NextResponse.json({
         success: false,
-        error: 'Tipo de evento debe ser: Anidación, Intento o Arqueo'
+        error: `Tipo de evento debe ser: ${tiposValidos.join(', ')}`
       }, { status: 400 });
     }
 
@@ -150,6 +158,8 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    console.log('✅ Validaciones pasadas, insertando evento...');
+
     const result = await query(`
       INSERT INTO Eventos (
         tipo_evento, fecha_hora, campamento_id, zona_playa, estacion_baliza,
@@ -162,6 +172,8 @@ export async function POST(request: NextRequest) {
       estacion_baliza || null, coordenada_lat || null, coordenada_lon || null,
       tortuga_id || null, personal_registro_id, observaciones || null
     ]);
+
+    console.log('✅ Evento insertado, ID:', result.rows[0].id);
 
     // Obtener el evento completo con información relacionada
     const eventoCompleto = await query(`
@@ -181,11 +193,24 @@ export async function POST(request: NextRequest) {
       data: eventoCompleto.rows[0],
       message: 'Evento creado exitosamente'
     }, { status: 201 });
-  } catch (error) {
-    console.error('Error al crear evento:', error);
+
+  } catch (error: any) {
+    console.error('❌ Error completo al crear evento:', error);
+    console.error('Stack trace:', error.stack);
+    console.error('Código de error:', error.code);
+    
+    // Errores específicos de PostgreSQL
+    if (error.code === '23503') {
+      return NextResponse.json({
+        success: false,
+        error: 'Error de integridad referencial: uno de los IDs no existe'
+      }, { status: 400 });
+    }
+
     return NextResponse.json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }
@@ -261,11 +286,12 @@ export async function PUT(request: NextRequest) {
       data: result.rows[0],
       message: 'Evento actualizado exitosamente'
     });
-  } catch (error) {
-    console.error('Error al actualizar evento:', error);
+  } catch (error: any) {
+    console.error('❌ Error al actualizar evento:', error);
     return NextResponse.json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }
@@ -297,9 +323,9 @@ export async function DELETE(request: NextRequest) {
       message: 'Evento eliminado exitosamente'
     });
   } catch (error: any) {
-    console.error('Error al eliminar evento:', error);
+    console.error('❌ Error al eliminar evento:', error);
     
-    if ((error as any)?.code === '23503') { // Foreign key constraint violation
+    if (error?.code === '23503') {
       return NextResponse.json({
         success: false,
         error: 'No se puede eliminar el evento porque tiene registros asociados'
@@ -308,7 +334,8 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }
