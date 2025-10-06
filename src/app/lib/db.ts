@@ -1,3 +1,4 @@
+//src/app/lib/db.ts
 import { Pool, Client } from 'pg';
 
 // Configuración de conexión a PostgreSQL
