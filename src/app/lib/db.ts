@@ -9,7 +9,7 @@ const dbConfig = {
   port: 5432,
 };
 
-// Pool de conexiones para mejor rendimiento
+// Pool de conexiones para mejor rendimiento.
 export const pool = new Pool(dbConfig);
 
 // Cliente individual para operaciones específicas
