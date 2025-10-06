@@ -70,10 +70,11 @@ export default function RootLayout({
         {/* Envuelve todo el contenido con ClientBodyWrapper */}
         <ClientBodyWrapper>
           <header className="p-4">
-            <LogoTortugaWordmark className="w-12 h-8 text-emerald-600" />
+            <LogoTortugaWordmark className="w-12 h-8 text-emerald-600 bg-[#0A0A0A]" />
           </header>
           {children}
         </ClientBodyWrapper>
+
       </body>
     </html>
   )

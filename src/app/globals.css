@@ -315,6 +315,35 @@ body {
   }
 }
 
+/* Animaciones para la página 404 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -603,12 +632,6 @@ body {
 
 /* ===== TURTLETRACK DASHBOARD STYLES ===== */
 
-.turtletrack-dashboard {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #4B8F8C 0%, #0F2A1F 100%);
-  color: var(--white);
-  padding: 40px;
-}
 
 /* Header */
 .turtletrack-header {
@@ -624,13 +647,6 @@ body {
   margin-bottom: 10px;
 }
 
-.turtletrack-title {
-  font-size: 30px;
-  font-weight: 700;
-  background: linear-gradient(90deg, #ffffff, var(--primary-color));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
 
 /* Action Buttons Grid */
 .turtletrack-actions {
