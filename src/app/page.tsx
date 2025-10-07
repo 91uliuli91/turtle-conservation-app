@@ -4,6 +4,7 @@ import Link from "next/link"
 import { PlusCircleIcon, MapIcon, ChartBarIcon, UserIcon, EyeIcon, CalendarIcon } from "@heroicons/react/24/outline"
 import './globals.css';
 import EnvironmentalDataPanel from "@/components/EnvironmentalDataPanel"
+import ProfileMenu from "@/components/ProfileMenu"
 
 export default function TurtleTrackDashboard() {
   const activityData = [
@@ -66,41 +67,36 @@ export default function TurtleTrackDashboard() {
         </main>
       </div>
 
-      {/* Navegación inferior - Botón central para eventos */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 p-3 shadow-lg">
-        <div className="flex justify-around items-center h-full max-w-lg mx-auto">
-          {/* Botón Mapa */}
-          <Link href="/mapa" className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
-            <MapIcon className="w-6 h-6" />
-            <span className="text-xs mt-1 font-medium">Mapa</span>
-          </Link>
+{/* Navegación inferior - Botón central para eventos */}
+<nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 p-3 shadow-lg">
+  <div className="flex justify-around items-center h-full max-w-lg mx-auto">
+    {/* Botón Mapa */}
+    <Link href="/mapa" className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
+      <MapIcon className="w-6 h-6" />
+      <span className="text-xs mt-1 font-medium">Mapa</span>
+    </Link>
 
-          {/* Botón Estadísticas */}
-          <Link href="/estadisticas" className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
-            <ChartBarIcon className="w-6 h-6" />
-            <span className="text-xs mt-1 font-medium">Datos</span>
-          </Link>
+    {/* Botón Estadísticas */}
+    <Link href="/estadisticas" className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
+      <ChartBarIcon className="w-6 h-6" />
+      <span className="text-xs mt-1 font-medium">Datos</span>
+    </Link>
 
-          {/* Botón central destacado - EVENTOS */}
-          <Link href="/formulario" className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg -mt-10 border-4 border-background animate-pulse hover:bg-primary/90 transition-all duration-300 ease-in-out transform hover:scale-105">
-            <PlusCircleIcon className="w-8 h-8" />
-          </Link>
+    {/* Botón central destacado - EVENTOS */}
+    <Link href="/formulario" className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-primary-foreground shadow-lg -mt-10 border-4 border-background animate-pulse hover:bg-primary/90 transition-all duration-300 ease-in-out transform hover:scale-105">
+      <PlusCircleIcon className="w-8 h-8" />
+    </Link>
 
-          {/* Botón Inicio */}
-          <Link href="/" className="flex flex-col items-center text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
-            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-primary"></div>
-            </div>
-            <span className="text-xs mt-1 font-medium">Inicio</span>
-          </Link>
-
-          {/* Botón Perfil */}
-          <Link href="/perfil" className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
-            <UserIcon className="w-6 h-6" />
-            <span className="text-xs mt-1 font-medium">Perfil</span>
-          </Link>
-        </div>
-      </nav>
+    {/* Botón Inicio */}
+    <Link href="/" className="flex flex-col items-center text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl">
+      <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+        <div className="w-3 h-3 rounded-full bg-primary"></div>
+      </div>
+      <span className="text-xs mt-1 font-medium">Inicio</span>
+    </Link>
+<ProfileMenu />
+  </div>
+</nav>
     </div>
   )
 }
