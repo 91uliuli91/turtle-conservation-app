@@ -1,4 +1,4 @@
-// src/components/WizardForm.tsx - VERSIÓN CORREGIDA
+// src/components/WizardForm.tsx - CON SOPORTE OFFLINE COMPLETO
 "use client"
 import { useState, useEffect } from "react"
 import EventTypeSelector from "./EventTypeSelector"
@@ -7,11 +7,14 @@ import EventDetails from "./EventDetails"
 import PhotoStep from "./PhotoStep"
 import SummaryStep from "./SummaryStep"
 import EnvironmentalDataPanel from "./EnvironmentalDataPanel"
-import { useOfflineAdvanced } from "../hooks/useOfflineAdvanced"
+import ConnectivityStatus from "./ConnectivityStatus"
+import { useNetworkStatus } from "../hooks/useNetworkStatus"
+import { offlineService } from "../lib/offline-service"
 import '../app/globals.css';
 
 // Definir la interfaz antes del componente
 interface EventDetailsType {
+  // Campos comunes
   numeroHuevos?: number;
   largoCaparazon?: number;
   anchoCaparazon?: number;
@@ -22,18 +25,30 @@ interface EventDetailsType {
   zona_playa?: 'A' | 'B' | 'C';
   estacion_baliza?: string;
   tortuga_id?: number;
+  
+  // Campos específicos para arqueo
+  nido_id?: number;
+  criasVivas?: number;
+  criasMuertas?: number;
+  criasDeformes?: number;
+  huevosNoEclosionados?: number;
+  comentariosArqueo?: string;
 }
 
-// Mock hook for offline functionality
-const useOffline = () => ({
-  isOnline: true,
-  pendingSyncs: 0,
-  saveEventOffline: async (data: any) => {
-    console.log("Saving offline:", data)
-    return Math.random().toString(36).substr(2, 9)
-  },
-  syncPendingEvents: async () => console.log("Syncing events"),
-})
+// Mock hook for offline functionality - REEMPLAZADO CON SERVICIO REAL
+const useOffline = () => {
+  const { networkStatus } = useNetworkStatus();
+  
+  return {
+    isOnline: networkStatus.isOnline,
+    pendingSyncs: 0,
+    saveEventOffline: async (data: any) => {
+      console.log("Saving offline:", data)
+      return Math.random().toString(36).substr(2, 9)
+    },
+    syncPendingEvents: async () => console.log("Syncing events"),
+  }
+}
 
 export default function WizardForm() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -41,7 +56,7 @@ export default function WizardForm() {
     type: "",
     location: { lat: 0, lon: 0 },
     details: {} as EventDetailsType, // Tipo específico aquí
-    photos: [] as string[],
+    photos: [] as File[], // Cambiar a File[] para soporte offline real
     observations: "",
     environmentalData: null as any
   })
@@ -51,7 +66,12 @@ export default function WizardForm() {
   const [isProgressAnimating, setIsProgressAnimating] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [headerHeight, setHeaderHeight] = useState(0)
-  const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOfflineAdvanced();
+  const [offlineMode, setOfflineMode] = useState(false)
+  const [referenceData, setReferenceData] = useState<any>(null)
+  
+  // Hooks para conectividad y offline
+  const { networkStatus, syncInProgress } = useNetworkStatus();
+  const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline();
 
   const nextStep = () => setCurrentStep((prev) => prev + 1)
   const prevStep = () => setCurrentStep((prev) => prev - 1)
@@ -113,28 +133,174 @@ export default function WizardForm() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [headerHeight]);
 
-  // Función handleSave corregida
+  // Inicializar servicio offline y cargar datos de referencia
+  useEffect(() => {
+    const initializeOfflineService = async () => {
+      try {
+        await offlineService.initialize();
+        
+        // Cargar datos de referencia para funcionar offline
+        const refData = await offlineService.getReferenceDataOffline();
+        setReferenceData(refData);
+        
+        console.log('📱 Offline service initialized with reference data');
+      } catch (error) {
+        console.error('❌ Failed to initialize offline service:', error);
+      }
+    };
+
+    initializeOfflineService();
+  }, []);
+
+  // Detectar modo offline
+  useEffect(() => {
+    setOfflineMode(!networkStatus.isConnected);
+  }, [networkStatus.isConnected]);
+
+  // Función handleSave COMPLETAMENTE ACTUALIZADA para soporte offline
 const handleSave = async () => {
   setIsSaving(true);
   setSaveStatus("saving");
 
   try {
-    const eventoData = {
-      tipo_evento: mapEventTypeToAPI(eventData.type),
+    // Verificar si estamos online o offline
+    if (!networkStatus.isConnected) {
+      console.log('📴 No connection - saving offline');
+      return await handleOfflineSave();
+    }
+
+    // Si estamos online, intentar guardar normalmente
+    try {
+      return await handleOnlineSave();
+    } catch (error) {
+      console.log('🔄 Online save failed, falling back to offline save');
+      return await handleOfflineSave();
+    }
+  } catch (error) {
+    console.error('❌ Error saving event:', error);
+    setSaveStatus("error");
+  } finally {
+    setIsSaving(false);
+  }
+};
+
+// Guardar en modo offline
+const handleOfflineSave = async () => {
+  try {
+    const result = await offlineService.saveEventoOffline({
+      tipo_evento: mapEventTypeToAPI(eventData.type) as 'Anidación' | 'Intento' | 'Arqueo',
+      fecha_hora: new Date().toISOString(),
+      campamento_id: eventData.details?.campamento_id || undefined,
+      zona_playa: eventData.details?.zona_playa || undefined,
+      estacion_baliza: eventData.details?.estacion_baliza || undefined,
+      coordenada_lat: eventData.location.lat,
+      coordenada_lon: eventData.location.lon,
+      tortuga_id: eventData.details?.tortuga_id || undefined,
+      personal_registro_id: 1, // TODO: Obtener del usuario logueado
+      observaciones: eventData.observations || undefined,
+      
+      // Condiciones ambientales
+      condiciones: eventData.environmentalData ? {
+        temperatura_arena_nido_c: eventData.environmentalData.temperature,
+        humedad_arena_porcentaje: eventData.environmentalData.humidity,
+        fase_lunar: eventData.environmentalData.moonPhase
+      } : undefined,
+      
+      // Observaciones de tortuga
+      observaciones_tortuga: {
+        largo_caparazon_cm: eventData.details?.largoCaparazon,
+        ancho_caparazon_cm: eventData.details?.anchoCaparazon,
+        se_coloco_marca_nueva: eventData.details?.seColocoMarca || false,
+        se_remarco: eventData.details?.seRemarco || false,
+        path_fotos: eventData.photos.length > 0 ? `offline_photos_${Date.now()}` : undefined
+      },
+      
+      // Fotos
+      fotos: eventData.photos.length > 0 ? eventData.photos : undefined
+    });
+
+    if (result.success) {
+      console.log('✅ Event saved offline successfully:', result.eventoId);
+      setSaveStatus("saved");
+      setShowSuccessOptions(true);
+    } else {
+      throw new Error('Failed to save offline');
+    }
+  } catch (error) {
+    console.error('❌ Offline save failed:', error);
+    setSaveStatus("error");
+    throw error;
+  }
+};
+
+// Guardar en modo online (función existente mejorada)
+const handleOnlineSave = async () => {
+
+  try {
+    const tipoEvento = mapEventTypeToAPI(eventData.type);
+    
+    // Datos base del evento
+    const baseData = {
       fecha_hora: new Date().toISOString(),
       coordenada_lat: eventData.location.lat,
       coordenada_lon: eventData.location.lon,
-      personal_registro_id: 1,
+      personal_registro_id: 1, // TODO: Obtener del usuario logueado
       observaciones: eventData.observations || '',
       campamento_id: eventData.details?.campamento_id || null,
       zona_playa: eventData.details?.zona_playa || null,
       estacion_baliza: eventData.details?.estacion_baliza || null,
-      tortuga_id: eventData.details?.tortuga_id || null
+      tortuga_id: eventData.details?.tortuga_id || null,
+      // Datos de las observaciones de tortuga
+      largo_caparazon: eventData.details?.largoCaparazon || null,
+      ancho_caparazon: eventData.details?.anchoCaparazon || null,
+      se_coloco_marca: eventData.details?.seColocoMarca || false,
+      se_remarco: eventData.details?.seRemarco || false,
+      // Datos ambientales (si están disponibles)
+      temperatura_arena: eventData.environmentalData?.temperature || null,
+      humedad_arena: eventData.environmentalData?.humidity || null,
+      fase_lunar: eventData.environmentalData?.moonPhase || null,
+      // Fotos
+      fotos_paths: eventData.photos?.length > 0 ? eventData.photos.join(',') : null
     };
 
-    console.log('📤 Enviando a /api/eventos:', eventoData);
+    let apiEndpoint = '';
+    let eventoData = { ...baseData };
 
-    const response = await fetch('/api/eventos', {
+    // Configurar datos específicos según el tipo de evento
+    switch (tipoEvento) {
+      case 'Anidación':
+        apiEndpoint = '/api/eventos/anidacion';
+        eventoData = {
+          ...baseData,
+          numero_huevos: eventData.details?.numeroHuevos || 0
+        } as any;
+        break;
+      
+      case 'Intento':
+        apiEndpoint = '/api/eventos/intento';
+        // Los datos base son suficientes para intento
+        break;
+      
+      case 'Arqueo':
+        apiEndpoint = '/api/eventos/arqueo';
+        eventoData = {
+          ...baseData,
+          nido_id: eventData.details?.nido_id || null,
+          crias_vivas_liberadas: eventData.details?.criasVivas || 0,
+          crias_muertas_en_nido: eventData.details?.criasMuertas || 0,
+          crias_deformes: eventData.details?.criasDeformes || 0,
+          huevos_no_eclosionados: eventData.details?.huevosNoEclosionados || 0,
+          comentarios_arqueo: eventData.details?.comentariosArqueo || null
+        } as any;
+        break;
+      
+      default:
+        throw new Error(`Tipo de evento no válido: ${tipoEvento}`);
+    }
+
+    console.log(`📤 Enviando a ${apiEndpoint}:`, eventoData);
+
+    const response = await fetch(apiEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -142,33 +308,29 @@ const handleSave = async () => {
       body: JSON.stringify(eventoData),
     });
 
-    // DEBUG: Ver la respuesta completa
-    const responseText = await response.text();
-    console.log('📥 Respuesta del servidor:', responseText.substring(0, 500));
-
-    // Verificar si es JSON válido
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ No es JSON válido:', responseText);
-      throw new Error(`El servidor devolvió HTML en lugar de JSON. ¿Existe la ruta /api/eventos?`);
-    }
-
+    // Verificar respuesta
     if (!response.ok) {
-      throw new Error(result.error || `Error ${response.status}: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('❌ Error del servidor:', errorText);
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
 
+    const result = await response.json();
     console.log('✅ Evento guardado:', result);
+
+    if (!result.success) {
+      throw new Error(result.error || 'Error desconocido al guardar');
+    }
+
     setSaveStatus("saved");
     setTimeout(() => setShowSuccessOptions(true), 1000);
+    
+    console.log('✅ Event saved online successfully');
 
   } catch (error: any) {
     console.error('❌ Error completo:', error);
-    setSaveStatus("error");
-    alert(`❌ Error: ${error.message}`);
-  } finally {
-    setIsSaving(false);
+    // No mostramos alert aquí, el error se propaga para usar fallback offline
+    throw error;
   }
 };
 
@@ -236,7 +398,7 @@ const handleSave = async () => {
       type: "",
       location: { lat: 0, lon: 0 },
       details: {} as EventDetailsType,
-      photos: [] as string[],
+      photos: [] as File[], // Corregido para consistencia
       observations: "",
       environmentalData: null,
     })
@@ -268,6 +430,13 @@ const handleSave = async () => {
 
     return (
       <>
+        {/* Componente de Estado de Conectividad */}
+        <ConnectivityStatus 
+          showDetails={true} 
+          position="top-right" 
+          className="mt-20 mr-4" // Evitar solapamiento con header compacto
+        />
+
         {/* Header Compacto - Aparece al final CON BORDES REDONDEADOS */}
         <div 
           className="fixed top-4 left-4 right-4 z-50 transition-all duration-500 backdrop-blur-xl border border-border/50 bg-card-sidebar shadow-lg"

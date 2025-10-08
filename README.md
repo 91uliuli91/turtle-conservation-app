@@ -3,6 +3,7 @@
 Sistema completo para la gestión y monitoreo de tortugas marinas con funcionalidad offline.
 
 ## Estado del proyecto
+
 - ✅ Deploy en GitHub Pages: https://91uliuli91.github.io/turtle-conservation-app/
 - ✅ Funcionalidad offline completa
 - 🚀 Dependencias actualizadas (@heroicons/react)

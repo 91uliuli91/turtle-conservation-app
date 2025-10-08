@@ -35,42 +35,54 @@ export default function MobileProfileMenu() {
 
   const handleLogin = async (email: string, password: string) => {
     try {
+      console.log('Intentando login con:', { email, password: '***' });
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
       
+      console.log('Respuesta login:', response.status, response.statusText);
+      
       if (response.ok) {
         const userData = await response.json();
+        console.log('Login exitoso:', userData);
         setUser(userData.user);
         setShowAuthModal(false);
         setShowMenu(false);
       } else {
-        alert('Credenciales incorrectas');
+        const errorData = await response.json();
+        console.error('Error de login:', errorData);
+        alert(`Error: ${errorData.error || 'Credenciales incorrectas'}`);
       }
     } catch (error) {
-      alert('Error al iniciar sesión');
+      console.error('Error de red en login:', error);
+      alert(`Error de conexión: ${error}`);
     }
   };
 
   const handleRegister = async (formData: any) => {
     try {
+      console.log('Enviando datos de registro:', formData);
       const response = await fetch('/api/auth/registro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       
+      console.log('Respuesta del servidor:', response.status, response.statusText);
+      
       if (response.ok) {
         alert('Registro exitoso. Ahora puedes iniciar sesión.');
         setIsLogin(true);
       } else {
         const error = await response.json();
-        alert(error.error || 'Error en el registro');
+        console.error('Error detallado:', error);
+        alert(`Error: ${error.error || 'Error en el registro'}`);
       }
     } catch (error) {
-      alert('Error al registrar usuario');
+      console.error('Error de red:', error);
+      alert(`Error de conexión: ${error}`);
     }
   };
 

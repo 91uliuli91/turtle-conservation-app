@@ -5,7 +5,7 @@ import { Pool, Client } from 'pg';
 const dbConfig = {
   user: 'misterturtle',
   host: 'localhost',
-  database: 'coral de datos',
+  database: 'coral_de_datos',
   password: 'aleta',
   port: 5432,
 };
