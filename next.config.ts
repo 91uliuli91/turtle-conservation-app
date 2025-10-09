@@ -1,14 +1,6 @@
 import type { NextConfig } from "next";
 
-const isProd = process.env.NODE_ENV === 'production';
-
 const nextConfig: NextConfig = {
-  // ❌ ELIMINAR exportación estática - las API routes necesitan servidor
-  // output: 'export',
-  // trailingSlash: true,
-  
-  assetPrefix: isProd ? '/turtle-conservation-app/' : '',
-  basePath: isProd ? '/turtle-conservation-app' : '',
   images: {
     unoptimized: true
   },

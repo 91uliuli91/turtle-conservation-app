@@ -21,6 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TurtleTrack - Sistema de Conservación",
   description: "Sistema de gestión para conservación de tortugas marinas",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 // Script para limpiar atributos antes de que React hidrate
