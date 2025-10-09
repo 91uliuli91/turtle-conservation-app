@@ -92,7 +92,7 @@ export default function TurtleTrackDashboard() {
       <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
         <div className="w-3 h-3 rounded-full bg-primary"></div>
       </div>
-      <span className="text-xs mt-1 font-medium">Inicio</span>
+      <span className="text-xs mt-1 font-medium">Siembra</span>
     </Link>
       <ProfileMenu />
   </div>
