@@ -49,232 +49,35 @@ const useOffline = () => {
   }
 }
 
-// Componente compacto de conectividad CON MODAL
-const CompactConnectivity = () => {
-  const { networkStatus, syncInProgress, triggerSync } = useNetworkStatus();
+// Componente compacto de conectividad SIN MODAL
+const CompactConnectivity = ({ onShowModal }: { onShowModal: () => void }) => {
+  const { networkStatus } = useNetworkStatus();
   const { pendingSyncs } = useOffline();
-  const [showModal, setShowModal] = useState(false);
-  const [offlineStats, setOfflineStats] = useState<any>(null);
-
-  // Cargar estadísticas offline
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        if (offlineService.isReady()) {
-          const stats = await offlineService.getOfflineStats();
-          setOfflineStats(stats);
-        }
-      } catch (error) {
-        console.error('Failed to load offline stats:', error);
-      }
-    };
-
-    if (showModal) {
-      loadStats();
-    }
-  }, [showModal]);
-
-  const handleSync = async () => {
-    try {
-      const result = await triggerSync();
-      if (result.success && offlineService.isReady()) {
-        const stats = await offlineService.getOfflineStats();
-        setOfflineStats(stats);
-      }
-    } catch (error) {
-      console.error('Manual sync failed:', error);
-    }
-  };
 
   return (
-    <>
-      {/* Cápsula clickeable */}
-      <div 
-        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300 cursor-pointer hover:shadow-md ${
-          networkStatus.isConnected
-            ? "bg-success/10 text-success border-success/30 hover:bg-success/20"
-            : "bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20"
-        }`}
-        onClick={() => setShowModal(true)}
-        title="Click para ver detalles de conectividad"
-      >
-        <div className="flex items-center gap-2">  
-          <div className={`w-2 h-2 rounded-full ${
-            networkStatus.isConnected ? "bg-success" : "bg-destructive"
-          } animate-pulse`}></div>
-          <span className="font-semibold">
-            {networkStatus.isConnected ? "Online" : "Offline"}
+    <div 
+      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300 cursor-pointer hover:shadow-md ${
+        networkStatus.isConnected
+          ? "bg-success/10 text-success border-success/30 hover:bg-success/20"
+          : "bg-destructive/10 text-destructive border-destructive/30 hover:bg-destructive/20"
+      }`}
+      onClick={onShowModal}
+      title="Click para ver detalles de conectividad"
+    >
+      <div className="flex items-center gap-2">  
+        <div className={`w-2 h-2 rounded-full ${
+          networkStatus.isConnected ? "bg-success" : "bg-destructive"
+        } animate-pulse`}></div>
+        <span className="font-semibold">
+          {networkStatus.isConnected ? "Online" : "Offline"}
+        </span>
+        {pendingSyncs > 0 && (
+          <span className="bg-muted/80 px-1.5 py-0.5 rounded text-xs">
+            {pendingSyncs}
           </span>
-          {pendingSyncs > 0 && (
-            <span className="bg-muted/80 px-1.5 py-0.5 rounded text-xs">
-              {pendingSyncs}
-            </span>
-          )}
-        </div>
+        )}
       </div>
-      {/* Modal de detalles - VERSIÓN MEJORADA CON TEMA OSCURO */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div 
-            className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header del modal */}
-            <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
-              <h3 className="text-xl font-bold text-foreground">Estado de Conectividad</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Contenido del modal */}
-            <div className="p-6 space-y-6">
-              {/* Estado de red */}
-              <div className="space-y-4">
-                <h4 className="font-semibold text-lg text-foreground">Estado de Conexión</h4>
-                <div className="space-y-3 bg-muted/30 rounded-xl p-4 border border-border">
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-base text-muted-foreground font-medium">Internet:</span>
-                    <span className={`text-base font-semibold px-3 py-1 rounded-full ${networkStatus.isOnline ? 'bg-success/20 text-success border border-success/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}`}>
-                      {networkStatus.isOnline ? 'Conectado' : 'Desconectado'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-base text-muted-foreground font-medium">Servidor:</span>
-                    <span className={`text-base font-semibold px-3 py-1 rounded-full ${networkStatus.isConnected ? 'bg-success/20 text-success border border-success/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}`}>
-                      {networkStatus.isConnected ? 'Conectado' : 'Desconectado'}
-                    </span>
-                  </div>
-
-                  {networkStatus.lastConnected && (
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-base text-muted-foreground font-medium">Última conexión:</span>
-                      <span className="text-base text-foreground font-medium bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                        {new Date(networkStatus.lastConnected).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Estadísticas offline */}
-              {offlineStats ? (
-                <div className="border-t border-border pt-6">
-                  <h4 className="font-semibold text-lg text-foreground mb-4">Datos Offline</h4>
-                  
-                  <div className="space-y-3 bg-muted/30 rounded-xl p-4 border border-border">
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-base text-muted-foreground font-medium">Eventos totales:</span>
-                      <span className="text-base font-bold text-foreground bg-secondary px-3 py-1 rounded-full border border-border">
-                        {offlineStats.eventos?.total || 0}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-base text-muted-foreground font-medium">Pendientes sync:</span>
-                      <span className={`text-base font-bold px-3 py-1 rounded-full ${(offlineStats.eventos?.pending || 0) > 0 ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' : 'bg-success/20 text-success border border-success/30'}`}>
-                        {offlineStats.eventos?.pending || 0}
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-base text-muted-foreground font-medium">Sincronizados:</span>
-                      <span className="text-base font-bold bg-success/20 text-success px-3 py-1 rounded-full border border-success/30">
-                        {offlineStats.eventos?.synced || 0}
-                      </span>
-                    </div>
-
-                    {offlineStats.media?.fotos > 0 && (
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-base text-muted-foreground font-medium">Fotos offline:</span>
-                        <span className="text-base font-bold bg-purple-500/20 text-purple-500 px-3 py-1 rounded-full border border-purple-500/30">
-                          {offlineStats.media.fotos}
-                        </span>
-                      </div>
-                    )}
-
-                    {offlineStats.sync?.queueSize > 0 && (
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-base text-muted-foreground font-medium">En cola de sync:</span>
-                        <span className="text-base font-bold bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full border border-blue-500/30">
-                          {offlineStats.sync.queueSize}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Acciones */}
-                  <div className="mt-6 pt-6 border-t border-border">
-                    {networkStatus.canSync && (
-                      <button
-                        onClick={handleSync}
-                        disabled={syncInProgress}
-                        className={`w-full px-6 py-4 text-base font-semibold rounded-xl transition-all duration-300 ${
-                          syncInProgress 
-                            ? 'bg-muted text-muted-foreground cursor-not-allowed' 
-                            : 'gradient-purple-blue text-white hover:shadow-lg hover:scale-105 active:scale-95'
-                        }`}
-                      >
-                        {syncInProgress ? (
-                          <div className="flex items-center justify-center gap-3">
-                            <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Sincronizando...
-                          </div>
-                        ) : (
-                          'Sincronizar Ahora'
-                        )}
-                      </button>
-                    )}
-                    
-                    {!networkStatus.canSync && (offlineStats.eventos?.pending || 0) > 0 && (
-                      <div className="text-center text-base text-muted-foreground bg-orange-500/10 py-4 rounded-xl border border-orange-500/20">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                          <span className="font-semibold text-orange-500">Modo Offline</span>
-                        </div>
-                        <span>{offlineStats.eventos.pending} eventos se sincronizarán cuando haya conexión</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                /* Loading state */
-                <div className="text-center py-8">
-                  <div className="flex items-center justify-center gap-3 text-muted-foreground">
-                    <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span className="text-lg">Cargando información offline...</span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer del modal */}
-            <div className="border-t border-border px-6 py-4 sticky bottom-0 bg-card">
-              <div className="flex justify-end">
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="px-6 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-colors border border-border hover:border-foreground/30"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 
@@ -297,8 +100,12 @@ export default function WizardForm() {
   const [offlineMode, setOfflineMode] = useState(false)
   const [referenceData, setReferenceData] = useState<any>(null)
   
+  // NUEVOS ESTADOS PARA EL MODAL
+  const [showConnectivityModal, setShowConnectivityModal] = useState(false);
+  const [offlineStats, setOfflineStats] = useState<any>(null);
+
   // Hooks para conectividad y offline
-  const { networkStatus, syncInProgress } = useNetworkStatus();
+  const { networkStatus, syncInProgress, triggerSync } = useNetworkStatus();
   const { isOnline, pendingSyncs, saveEventOffline, syncPendingEvents } = useOffline();
 
   const nextStep = () => setCurrentStep((prev) => prev + 1)
@@ -380,168 +187,183 @@ export default function WizardForm() {
     setOfflineMode(!networkStatus.isConnected);
   }, [networkStatus.isConnected]);
 
-  // Función handleSave COMPLETAMENTE ACTUALIZADA para soporte offline
-const handleSave = async () => {
-  setIsSaving(true);
-  setSaveStatus("saving");
-
-  try {
-    if (!networkStatus.isConnected) {
-      console.log('📴 No connection - saving offline');
-      return await handleOfflineSave();
+  // Función para manejar el modal de conectividad
+  const handleConnectivityModal = async (show: boolean) => {
+    setShowConnectivityModal(show);
+    if (show) {
+      try {
+        if (offlineService.isReady()) {
+          const stats = await offlineService.getOfflineStats();
+          setOfflineStats(stats);
+        }
+      } catch (error) {
+        console.error('Failed to load offline stats:', error);
+      }
     }
+  };
+
+  // Función handleSave COMPLETAMENTE ACTUALIZADA para soporte offline
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveStatus("saving");
 
     try {
-      return await handleOnlineSave();
+      if (!networkStatus.isConnected) {
+        console.log('📴 No connection - saving offline');
+        return await handleOfflineSave();
+      }
+
+      try {
+        return await handleOnlineSave();
+      } catch (error) {
+        console.log('🔄 Online save failed, falling back to offline save');
+        return await handleOfflineSave();
+      }
     } catch (error) {
-      console.log('🔄 Online save failed, falling back to offline save');
-      return await handleOfflineSave();
+      console.error('❌ Error saving event:', error);
+      setSaveStatus("error");
+    } finally {
+      setIsSaving(false);
     }
-  } catch (error) {
-    console.error('❌ Error saving event:', error);
-    setSaveStatus("error");
-  } finally {
-    setIsSaving(false);
-  }
-};
+  };
 
-// Guardar en modo offline
-const handleOfflineSave = async () => {
-  try {
-    const result = await offlineService.saveEventoOffline({
-      tipo_evento: mapEventTypeToAPI(eventData.type) as 'Anidación' | 'Intento' | 'Arqueo',
-      fecha_hora: new Date().toISOString(),
-      campamento_id: eventData.details?.campamento_id || undefined,
-      zona_playa: eventData.details?.zona_playa || undefined,
-      estacion_baliza: eventData.details?.estacion_baliza || undefined,
-      coordenada_lat: eventData.location.lat,
-      coordenada_lon: eventData.location.lon,
-      tortuga_id: eventData.details?.tortuga_id || undefined,
-      personal_registro_id: 1,
-      observaciones: eventData.observations || undefined,
+  // Guardar en modo offline
+  const handleOfflineSave = async () => {
+    try {
+      const result = await offlineService.saveEventoOffline({
+        tipo_evento: mapEventTypeToAPI(eventData.type) as 'Anidación' | 'Intento' | 'Arqueo',
+        fecha_hora: new Date().toISOString(),
+        campamento_id: eventData.details?.campamento_id || undefined,
+        zona_playa: eventData.details?.zona_playa || undefined,
+        estacion_baliza: eventData.details?.estacion_baliza || undefined,
+        coordenada_lat: eventData.location.lat,
+        coordenada_lon: eventData.location.lon,
+        tortuga_id: eventData.details?.tortuga_id || undefined,
+        personal_registro_id: 1,
+        observaciones: eventData.observations || undefined,
+        
+        condiciones: eventData.environmentalData ? {
+          temperatura_arena_nido_c: eventData.environmentalData.temperature,
+          humedad_arena_porcentaje: eventData.environmentalData.humidity,
+          fase_lunar: eventData.environmentalData.moonPhase
+        } : undefined,
+        
+        observaciones_tortuga: {
+          largo_caparazon_cm: eventData.details?.largoCaparazon,
+          ancho_caparazon_cm: eventData.details?.anchoCaparazon,
+          se_coloco_marca_nueva: eventData.details?.seColocoMarca || false,
+          se_remarco: eventData.details?.seRemarco || false,
+          path_fotos: eventData.photos.length > 0 ? `offline_photos_${Date.now()}` : undefined
+        },
+        
+        fotos: eventData.photos.length > 0 ? eventData.photos : undefined
+      });
+
+      if (result.success) {
+        console.log('✅ Event saved offline successfully:', result.eventoId);
+        setSaveStatus("saved");
+        setShowSuccessOptions(true);
+      } else {
+        throw new Error('Failed to save offline');
+      }
+    } catch (error) {
+      console.error('❌ Offline save failed:', error);
+      setSaveStatus("error");
+      throw error;
+    }
+  };
+
+  // Guardar en modo online
+  const handleOnlineSave = async () => {
+    try {
+      const tipoEvento = mapEventTypeToAPI(eventData.type);
       
-      condiciones: eventData.environmentalData ? {
-        temperatura_arena_nido_c: eventData.environmentalData.temperature,
-        humedad_arena_porcentaje: eventData.environmentalData.humidity,
-        fase_lunar: eventData.environmentalData.moonPhase
-      } : undefined,
-      
-      observaciones_tortuga: {
-        largo_caparazon_cm: eventData.details?.largoCaparazon,
-        ancho_caparazon_cm: eventData.details?.anchoCaparazon,
-        se_coloco_marca_nueva: eventData.details?.seColocoMarca || false,
+      const baseData = {
+        fecha_hora: new Date().toISOString(),
+        coordenada_lat: eventData.location.lat,
+        coordenada_lon: eventData.location.lon,
+        personal_registro_id: 1,
+        observaciones: eventData.observations || '',
+        campamento_id: eventData.details?.campamento_id || null,
+        zona_playa: eventData.details?.zona_playa || null,
+        estacion_baliza: eventData.details?.estacion_baliza || null,
+        tortuga_id: eventData.details?.tortuga_id || null,
+        largo_caparazon: eventData.details?.largoCaparazon || null,
+        ancho_caparazon: eventData.details?.anchoCaparazon || null,
+        se_coloco_marca: eventData.details?.seColocoMarca || false,
         se_remarco: eventData.details?.seRemarco || false,
-        path_fotos: eventData.photos.length > 0 ? `offline_photos_${Date.now()}` : undefined
-      },
-      
-      fotos: eventData.photos.length > 0 ? eventData.photos : undefined
-    });
+        temperatura_arena: eventData.environmentalData?.temperature || null,
+        humedad_arena: eventData.environmentalData?.humidity || null,
+        fase_lunar: eventData.environmentalData?.moonPhase || null,
+        fotos_paths: eventData.photos?.length > 0 ? eventData.photos.join(',') : null
+      };
 
-    if (result.success) {
-      console.log('✅ Event saved offline successfully:', result.eventoId);
+      let apiEndpoint = '';
+      let eventoData = { ...baseData };
+
+      switch (tipoEvento) {
+        case 'Anidación':
+          apiEndpoint = '/api/eventos/anidacion';
+          eventoData = {
+            ...baseData,
+            numero_huevos: eventData.details?.numeroHuevos || 0
+          } as any;
+          break;
+        
+        case 'Intento':
+          apiEndpoint = '/api/eventos/intento';
+          break;
+        
+        case 'Arqueo':
+          apiEndpoint = '/api/eventos/arqueo';
+          eventoData = {
+            ...baseData,
+            nido_id: eventData.details?.nido_id || null,
+            crias_vivas_liberadas: eventData.details?.criasVivas || 0,
+            crias_muertas_en_nido: eventData.details?.criasMuertas || 0,
+            crias_deformes: eventData.details?.criasDeformes || 0,
+            huevos_no_eclosionados: eventData.details?.huevosNoEclosionados || 0,
+            comentarios_arqueo: eventData.details?.comentariosArqueo || null
+          } as any;
+          break;
+        
+        default:
+          throw new Error(`Tipo de evento no válido: ${tipoEvento}`);
+      }
+
+      console.log(`📤 Enviando a ${apiEndpoint}:`, eventoData);
+
+      const response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventoData),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Error del servidor:', errorText);
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Evento guardado:', result);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Error desconocido al guardar');
+      }
+
       setSaveStatus("saved");
-      setShowSuccessOptions(true);
-    } else {
-      throw new Error('Failed to save offline');
-    }
-  } catch (error) {
-    console.error('❌ Offline save failed:', error);
-    setSaveStatus("error");
-    throw error;
-  }
-};
-
-// Guardar en modo online
-const handleOnlineSave = async () => {
-  try {
-    const tipoEvento = mapEventTypeToAPI(eventData.type);
-    
-    const baseData = {
-      fecha_hora: new Date().toISOString(),
-      coordenada_lat: eventData.location.lat,
-      coordenada_lon: eventData.location.lon,
-      personal_registro_id: 1,
-      observaciones: eventData.observations || '',
-      campamento_id: eventData.details?.campamento_id || null,
-      zona_playa: eventData.details?.zona_playa || null,
-      estacion_baliza: eventData.details?.estacion_baliza || null,
-      tortuga_id: eventData.details?.tortuga_id || null,
-      largo_caparazon: eventData.details?.largoCaparazon || null,
-      ancho_caparazon: eventData.details?.anchoCaparazon || null,
-      se_coloco_marca: eventData.details?.seColocoMarca || false,
-      se_remarco: eventData.details?.seRemarco || false,
-      temperatura_arena: eventData.environmentalData?.temperature || null,
-      humedad_arena: eventData.environmentalData?.humidity || null,
-      fase_lunar: eventData.environmentalData?.moonPhase || null,
-      fotos_paths: eventData.photos?.length > 0 ? eventData.photos.join(',') : null
-    };
-
-    let apiEndpoint = '';
-    let eventoData = { ...baseData };
-
-    switch (tipoEvento) {
-      case 'Anidación':
-        apiEndpoint = '/api/eventos/anidacion';
-        eventoData = {
-          ...baseData,
-          numero_huevos: eventData.details?.numeroHuevos || 0
-        } as any;
-        break;
+      setTimeout(() => setShowSuccessOptions(true), 1000);
       
-      case 'Intento':
-        apiEndpoint = '/api/eventos/intento';
-        break;
-      
-      case 'Arqueo':
-        apiEndpoint = '/api/eventos/arqueo';
-        eventoData = {
-          ...baseData,
-          nido_id: eventData.details?.nido_id || null,
-          crias_vivas_liberadas: eventData.details?.criasVivas || 0,
-          crias_muertas_en_nido: eventData.details?.criasMuertas || 0,
-          crias_deformes: eventData.details?.criasDeformes || 0,
-          huevos_no_eclosionados: eventData.details?.huevosNoEclosionados || 0,
-          comentarios_arqueo: eventData.details?.comentariosArqueo || null
-        } as any;
-        break;
-      
-      default:
-        throw new Error(`Tipo de evento no válido: ${tipoEvento}`);
+      console.log('✅ Event saved online successfully');
+
+    } catch (error: any) {
+      console.error('❌ Error completo:', error);
+      throw error;
     }
-
-    console.log(`📤 Enviando a ${apiEndpoint}:`, eventoData);
-
-    const response = await fetch(apiEndpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventoData),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ Error del servidor:', errorText);
-      throw new Error(`Error ${response.status}: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    console.log('✅ Evento guardado:', result);
-
-    if (!result.success) {
-      throw new Error(result.error || 'Error desconocido al guardar');
-    }
-
-    setSaveStatus("saved");
-    setTimeout(() => setShowSuccessOptions(true), 1000);
-    
-    console.log('✅ Event saved online successfully');
-
-  } catch (error: any) {
-    console.error('❌ Error completo:', error);
-    throw error;
-  }
-};
+  };
 
   // Función auxiliar para mapear tipos de evento
   const mapEventTypeToAPI = (type: string): 'Anidación' | 'Intento' | 'Arqueo' => {
@@ -643,7 +465,7 @@ const handleOnlineSave = async () => {
                   transform: `scale(${0.9 + (compactOpacity * 0.1)})`,
                 }}
               >
-                <CompactConnectivity />
+                <CompactConnectivity onShowModal={() => handleConnectivityModal(true)} />
               </div>
             </div>
           </div>
@@ -685,7 +507,7 @@ const handleOnlineSave = async () => {
                       transform: `scale(${1 - (scrollProgress * 0.3)}) translateY(${scrollProgress * 8}px)`
                     }}
                   >
-                    <CompactConnectivity />
+                    <CompactConnectivity onShowModal={() => handleConnectivityModal(true)} />
                   </div>
                 </div>          
                 <div className="flex justify-between items-start mb-8">
@@ -953,7 +775,7 @@ const handleOnlineSave = async () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header unificado con transición al final - SIN ConnectivityStatus */}
+      {/* Header unificado con transición al final */}
       <UnifiedHeader />
       
       {/* Contenido principal con padding fijo */}
@@ -1015,6 +837,179 @@ const handleOnlineSave = async () => {
                     <span className="font-semibold text-lg">Error al guardar el evento</span>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CONECTIVIDAD - FLOTANTE SOBRE EL CONTENIDO */}
+      {showConnectivityModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div 
+            className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl mx-auto max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del modal */}
+            <div className="flex items-center justify-between p-6 border-b border-border sticky top-0 bg-card z-10">
+              <h3 className="text-xl font-bold text-foreground">Estado de Conectividad</h3>
+              <button
+                onClick={() => setShowConnectivityModal(false)}
+                className="p-2 hover:bg-accent rounded-lg transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Contenido del modal */}
+            <div className="p-6 space-y-6">
+              {/* Estado de red */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-lg text-foreground">Estado de Conexión</h4>
+                <div className="space-y-3 bg-muted/30 rounded-xl p-4 border border-border">
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-base text-muted-foreground font-medium">Internet:</span>
+                    <span className={`text-base font-semibold px-3 py-1 rounded-full ${networkStatus.isOnline ? 'bg-success/20 text-success border border-success/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}`}>
+                      {networkStatus.isOnline ? 'Conectado' : 'Desconectado'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-base text-muted-foreground font-medium">Servidor:</span>
+                    <span className={`text-base font-semibold px-3 py-1 rounded-full ${networkStatus.isConnected ? 'bg-success/20 text-success border border-success/30' : 'bg-destructive/20 text-destructive border border-destructive/30'}`}>
+                      {networkStatus.isConnected ? 'Conectado' : 'Desconectado'}
+                    </span>
+                  </div>
+
+                  {networkStatus.lastConnected && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-base text-muted-foreground font-medium">Última conexión:</span>
+                      <span className="text-base text-foreground font-medium bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                        {new Date(networkStatus.lastConnected).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Estadísticas offline */}
+              {offlineStats ? (
+                <div className="border-t border-border pt-6">
+                  <h4 className="font-semibold text-lg text-foreground mb-4">Datos Offline</h4>
+                  
+                  <div className="space-y-3 bg-muted/30 rounded-xl p-4 border border-border">
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-base text-muted-foreground font-medium">Eventos totales:</span>
+                      <span className="text-base font-bold text-foreground bg-secondary px-3 py-1 rounded-full border border-border">
+                        {offlineStats.eventos?.total || 0}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-base text-muted-foreground font-medium">Pendientes sync:</span>
+                      <span className={`text-base font-bold px-3 py-1 rounded-full ${(offlineStats.eventos?.pending || 0) > 0 ? 'bg-orange-500/20 text-orange-500 border border-orange-500/30' : 'bg-success/20 text-success border border-success/30'}`}>
+                        {offlineStats.eventos?.pending || 0}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-base text-muted-foreground font-medium">Sincronizados:</span>
+                      <span className="text-base font-bold bg-success/20 text-success px-3 py-1 rounded-full border border-success/30">
+                        {offlineStats.eventos?.synced || 0}
+                      </span>
+                    </div>
+
+                    {offlineStats.media?.fotos > 0 && (
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-base text-muted-foreground font-medium">Fotos offline:</span>
+                        <span className="text-base font-bold bg-purple-500/20 text-purple-500 px-3 py-1 rounded-full border border-purple-500/30">
+                          {offlineStats.media.fotos}
+                        </span>
+                      </div>
+                    )}
+
+                    {offlineStats.sync?.queueSize > 0 && (
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-base text-muted-foreground font-medium">En cola de sync:</span>
+                        <span className="text-base font-bold bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full border border-blue-500/30">
+                          {offlineStats.sync.queueSize}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="mt-6 pt-6 border-t border-border">
+                    {networkStatus.canSync && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const result = await triggerSync();
+                            if (result.success && offlineService.isReady()) {
+                              const stats = await offlineService.getOfflineStats();
+                              setOfflineStats(stats);
+                            }
+                          } catch (error) {
+                            console.error('Manual sync failed:', error);
+                          }
+                        }}
+                        disabled={syncInProgress}
+                        className={`w-full px-6 py-4 text-base font-semibold rounded-xl transition-all duration-300 ${
+                          syncInProgress 
+                            ? 'bg-muted text-muted-foreground cursor-not-allowed' 
+                            : 'gradient-purple-blue text-white hover:shadow-lg hover:scale-105 active:scale-95'
+                        }`}
+                      >
+                        {syncInProgress ? (
+                          <div className="flex items-center justify-center gap-3">
+                            <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Sincronizando...
+                          </div>
+                        ) : (
+                          'Sincronizar Ahora'
+                        )}
+                      </button>
+                    )}
+                    
+                    {!networkStatus.canSync && (offlineStats.eventos?.pending || 0) > 0 && (
+                      <div className="text-center text-base text-muted-foreground bg-orange-500/10 py-4 rounded-xl border border-orange-500/20">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                          <span className="font-semibold text-orange-500">Modo Offline</span>
+                        </div>
+                        <span>{offlineStats.eventos.pending} eventos se sincronizarán cuando haya conexión</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Loading state */
+                <div className="text-center py-8">
+                  <div className="flex items-center justify-center gap-3 text-muted-foreground">
+                    <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span className="text-lg">Cargando información offline...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer del modal */}
+            <div className="border-t border-border px-6 py-4 sticky bottom-0 bg-card">
+              <div className="flex justify-end">
+                <button
+                  onClick={() => setShowConnectivityModal(false)}
+                  className="px-6 py-3 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-colors border border-border hover:border-foreground/30"
+                >
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>
