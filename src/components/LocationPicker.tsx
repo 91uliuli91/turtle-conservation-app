@@ -415,23 +415,7 @@ export default function LocationPicker({ onLocationConfirm, onBack }: LocationPi
                   <>
                     <div ref={mapContainerRef} className="h-96 w-full" style={{ minHeight: '400px' }} />
                     
-                    {/* Controles del mapa */}
-                    <div className="absolute bottom-4 left-4 right-4 flex gap-2 z-[1000]">
-                      <button
-                        onClick={handleUseCurrentLocation}
-                        disabled={isLoadingLocation}
-                        className={`flex-1 px-4 py-3 bg-card/95 backdrop-blur-sm border border-border rounded-xl font-medium text-sm hover:bg-accent transition-colors flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
-                      >
-                        {isLoadingLocation ? (
-                          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          </svg>
-                        )}
-                        Mi ubicación
-                      </button>
-                    </div>
+
                   </>
                 )}
               </div>
