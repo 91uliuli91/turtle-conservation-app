@@ -1,4 +1,4 @@
-// src/components/PhotoStep.tsx - VERSIÓN CORREGIDA (Múltiples fotos)
+// src/components/PhotoStep.tsx - VERSIÓN CORREGIDA (Múltiples fotos funcionando)
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
@@ -16,6 +16,7 @@ interface PhotoPreview {
   file: File
   url: string
   timestamp: number
+  blob: Blob // ← AGREGAR ESTA LÍNEA PARA MANTENER LA REFERENCIA AL BLOB
 }
 
 export default function PhotoStep({ 
@@ -43,78 +44,80 @@ export default function PhotoStep({
   // Abrir cámara del dispositivo
   const openCamera = useCallback(async () => {
     try {
-      console.log('🎥 Intentando abrir cámara...')
-      setIsCameraOpen(true)
+      // CORRECCIÓN: Limpiar stream anterior SI existe
+      if (stream) {
+        console.log('🔄 Limpiando stream anterior...');
+        stream.getTracks().forEach(track => {
+          console.log(`⏹️ Deteniendo track: ${track.kind}`);
+          track.stop();
+        });
+        setStream(null);
+        // Pequeña pausa para asegurar la limpieza
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
+      console.log('🎥 Intentando abrir cámara...');
+      setIsCameraOpen(true);
       
       // Verificar disponibilidad de la API
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Tu navegador no soporta acceso a la cámara')
+        throw new Error('Tu navegador no soporta acceso a la cámara');
       }
       
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'environment',
-          width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
         },
         audio: false
-      })
+      });
       
-      console.log('✅ Stream obtenido:', mediaStream)
+      console.log('✅ Stream obtenido:', mediaStream);
       
-      setStream(mediaStream)
+      setStream(mediaStream);
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
+        videoRef.current.srcObject = mediaStream;
         
         videoRef.current.onloadedmetadata = () => {
-          console.log('📺 Video metadata cargada')
+          console.log('📺 Video metadata cargada');
           videoRef.current?.play().catch(err => {
-            console.error('❌ Error playing video:', err)
-          })
-        }
+            console.error('❌ Error playing video:', err);
+          });
+        };
 
-        // Manejar errores del video
-        videoRef.current.onerror = () => {
-          console.error('❌ Error en el elemento video')
-        }
+        // Agregar manejo de errores del video
+        videoRef.current.onerror = (e) => {
+          console.error('❌ Error en elemento video:', e);
+        };
       }
     } catch (error: any) {
-      console.error('❌ Error al acceder a la cámara:', error)
-      setIsCameraOpen(false)
-      
-      let errorMessage = 'No se pudo acceder a la cámara.'
-      
-      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        errorMessage = 'Permiso de cámara denegado. Por favor, permite el acceso a la cámara en la configuración de tu navegador.'
-      } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        errorMessage = 'No se encontró ninguna cámara en tu dispositivo.'
-      } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
-        errorMessage = 'La cámara está siendo usada por otra aplicación.'
-      } else if (error.name === 'OverconstrainedError') {
-        errorMessage = 'No se pudo acceder a la cámara con la configuración solicitada.'
-      } else {
-        errorMessage = `Error: ${error.message || 'Error desconocido'}`
-      }
-      
-      alert(errorMessage)
+      console.error('❌ Error al acceder a la cámara:', error);
+      setIsCameraOpen(false);
+      alert('No se pudo acceder a la cámara: ' + error.message);
     }
-  }, [])
+  }, [stream]);
+
+  // Efecto para reiniciar la cámara cuando se abre
+  useEffect(() => {
+    if (isCameraOpen && !stream) {
+      // Si la cámara está abierta pero no hay stream, intentar abrirla
+      openCamera();
+    }
+  }, [isCameraOpen, stream, openCamera]);
 
   // Cerrar cámara
   const closeCamera = useCallback(() => {
     if (stream) {
       console.log('🔴 Cerrando cámara...')
-      stream.getTracks().forEach(track => {
-        track.stop()
-        console.log(`⏹️ Deteniendo track: ${track.kind}`)
-      })
+      stream.getTracks().forEach(track => track.stop())
       setStream(null)
     }
     setIsCameraOpen(false)
   }, [stream])
 
-  // CORRECCIÓN: Función mejorada para capturar foto
+  // SOLUCIÓN DEFINITIVA: Capturar foto manteniendo referencia al blob
   const capturePhoto = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || !stream) {
       console.error('❌ No hay video, canvas o stream disponible')
@@ -127,18 +130,17 @@ export default function PhotoStep({
       const video = videoRef.current
       const canvas = canvasRef.current
       
-      // Esperar a que el video esté listo
+      // Verificar que el video esté listo
       if (video.videoWidth === 0 || video.videoHeight === 0) {
         console.error('❌ Video no está listo')
         setIsCapturing(false)
         return
       }
 
-      // Configurar canvas con las dimensiones del video
+      // Configurar canvas
       canvas.width = video.videoWidth
       canvas.height = video.videoHeight
       
-      // Dibujar el frame actual del video en el canvas
       const ctx = canvas.getContext('2d')
       if (!ctx) {
         console.error('❌ No se pudo obtener el contexto 2D')
@@ -146,54 +148,102 @@ export default function PhotoStep({
         return
       }
 
-      // Limpiar y dibujar el frame
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Dibujar frame actual
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
       
-      // CORRECCIÓN: Usar await para convertir a blob de forma síncrona
-      const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, 'image/jpeg', 0.9)
+      // SOLUCIÓN: Convertir canvas a data URL en lugar de blob
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
+      
+      // Convertir data URL a blob
+      const response = await fetch(dataUrl)
+      const blob = await response.blob()
+      
+      const timestamp = Date.now()
+      const fileName = `foto_${timestamp}.jpg`
+      
+      // Crear File desde el blob
+      const file = new File([blob], fileName, {
+        type: 'image/jpeg',
+        lastModified: timestamp
       })
-
-      if (blob) {
-        const timestamp = Date.now()
-        
-        // CORRECCIÓN: Crear el File desde el blob manteniendo la referencia
-        const file = new File([blob], `foto_${timestamp}.jpg`, {
-          type: 'image/jpeg',
-          lastModified: timestamp
-        })
-        
-        // CORRECCIÓN: Crear URL que mantenga la referencia al blob
-        const url = URL.createObjectURL(blob)
-        
-        const photoPreview: PhotoPreview = {
-          id: `photo_${timestamp}`,
-          file,
-          url,
-          timestamp
-        }
-        
-        // Actualizar estado con la nueva foto
-        const updatedPhotos = [...photos, photoPreview]
-        updatePhotos(updatedPhotos)
-        
-        console.log(`✅ Foto capturada: ${file.name}`)
-        
-        // Efecto visual de captura (opcional)
-        if (canvas.parentElement) {
-          canvas.parentElement.style.opacity = '0.7'
-          setTimeout(() => {
-            if (canvas.parentElement) {
-              canvas.parentElement.style.opacity = '1'
-            }
-          }, 200)
-        }
-      } else {
-        console.error('❌ No se pudo crear el blob de la foto')
+      
+      // Crear URL desde el blob (no desde data URL)
+      const url = URL.createObjectURL(blob)
+      
+      const photoPreview: PhotoPreview = {
+        id: `photo_${timestamp}`,
+        file,
+        url,
+        timestamp,
+        blob // ← MANTENER REFERENCIA AL BLOB
       }
+      
+      // Actualizar fotos
+      const updatedPhotos = [...photos, photoPreview]
+      updatePhotos(updatedPhotos)
+      
+      console.log(`✅ Foto capturada: ${fileName} (${blob.size} bytes)`)
+      
     } catch (error) {
       console.error('❌ Error al capturar foto:', error)
+      alert('Error al capturar la foto: ' + error)
+    } finally {
+      setIsCapturing(false)
+    }
+  }, [photos, updatePhotos, stream])
+
+  // ALTERNATIVA MÁS SIMPLE: Usar data URL directamente para preview
+  const capturePhotoSimple = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current || !stream) {
+      return
+    }
+    
+    setIsCapturing(true)
+    
+    try {
+      const video = videoRef.current
+      const canvas = canvasRef.current
+      
+      if (video.videoWidth === 0 || video.videoHeight === 0) return
+
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      
+      // SOLUCIÓN SIMPLE: Usar data URL directamente para el preview
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
+      
+      const timestamp = Date.now()
+      const fileName = `foto_${timestamp}.jpg`
+      
+      // Convertir data URL a blob para el File
+      const response = await fetch(dataUrl)
+      const blob = await response.blob()
+      
+      const file = new File([blob], fileName, {
+        type: 'image/jpeg',
+        lastModified: timestamp
+      })
+      
+      const photoPreview: PhotoPreview = {
+        id: `photo_${timestamp}`,
+        file,
+        url: dataUrl, // ← USAR DATA URL DIRECTAMENTE PARA EL PREVIEW
+        timestamp,
+        blob
+      }
+      
+      const updatedPhotos = [...photos, photoPreview]
+      updatePhotos(updatedPhotos)
+      
+      console.log(`✅ Foto capturada: ${fileName}`)
+      
+    } catch (error) {
+      console.error('Error al capturar foto:', error)
     } finally {
       setIsCapturing(false)
     }
@@ -213,7 +263,8 @@ export default function PhotoStep({
           id: `photo_${timestamp}`,
           file,
           url: URL.createObjectURL(file),
-          timestamp
+          timestamp,
+          blob: file // Para archivos subidos, el file ya es un blob
         }
         newPhotos.push(photoPreview)
       }
@@ -222,7 +273,6 @@ export default function PhotoStep({
     const updatedPhotos = [...photos, ...newPhotos]
     updatePhotos(updatedPhotos)
     
-    // Resetear input
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
@@ -232,7 +282,10 @@ export default function PhotoStep({
   const handleRemovePhoto = useCallback((photoId: string) => {
     const photoToRemove = photos.find(p => p.id === photoId)
     if (photoToRemove) {
-      URL.revokeObjectURL(photoToRemove.url)
+      // Solo revocar URL si no es una data URL
+      if (!photoToRemove.url.startsWith('data:')) {
+        URL.revokeObjectURL(photoToRemove.url)
+      }
     }
     
     const updatedPhotos = photos.filter(p => p.id !== photoId)
@@ -245,36 +298,18 @@ export default function PhotoStep({
     onObservationsChange(value)
   }, [onObservationsChange])
 
-  // CORRECCIÓN: Efecto para manejar el estado de la cámara
-  useEffect(() => {
-    if (isCameraOpen && videoRef.current && stream) {
-      // Verificar que los tracks estén activos
-      const videoTrack = stream.getVideoTracks()[0]
-      if (videoTrack && videoTrack.readyState === 'ended') {
-        console.log('🔄 Restableciendo cámara...')
-        closeCamera()
-        setTimeout(() => openCamera(), 100)
-      }
-    }
-  }, [isCameraOpen, stream, closeCamera, openCamera])
-
   // Limpiar recursos al desmontar
   useEffect(() => {
     return () => {
       if (stream) {
-        console.log('🧹 Limpiando stream...')
-        stream.getTracks().forEach(track => track.stop())
+        console.log('🧹 Limpiando stream en cleanup...');
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
       }
-      // Liberar URLs de fotos
-      photos.forEach(photo => {
-        try {
-          URL.revokeObjectURL(photo.url)
-        } catch (err) {
-          console.error('Error revoking URL:', err)
-        }
-      })
-    }
-  }, [stream, photos])
+      // No liberar URLs de fotos aquí para mantener las previews
+    };
+  }, [stream]);
 
   return (
     <div className="flex flex-col animate-fadeInUp">
@@ -292,11 +327,6 @@ export default function PhotoStep({
               <div className="text-white font-semibold flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${stream ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
                 Cámara {stream ? 'Activa' : 'Iniciando...'}
-                {stream && (
-                  <span className="text-xs text-green-300">
-                    ({stream.getVideoTracks().length} video tracks)
-                  </span>
-                )}
               </div>
               <button
                 onClick={closeCamera}
@@ -327,12 +357,6 @@ export default function PhotoStep({
 
               {/* Overlay de guía */}
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                {!stream && (
-                  <div className="text-white text-center">
-                    <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-lg font-medium">Iniciando cámara...</p>
-                  </div>
-                )}
                 {stream && (
                   <div className="w-full h-full border-2 border-white/30 m-auto" 
                        style={{ maxWidth: '90%', maxHeight: '90%' }} />
@@ -355,9 +379,9 @@ export default function PhotoStep({
                   {photos.length} capturadas
                 </div>
 
-                {/* Botón de captura */}
+                {/* Botón de captura - USAR LA VERSIÓN SIMPLE */}
                 <button
-                  onClick={capturePhoto}
+                  onClick={capturePhotoSimple}
                   disabled={isCapturing || !stream}
                   className={`w-20 h-20 rounded-full border-4 border-white 
                             flex items-center justify-center transition-all duration-200
@@ -389,7 +413,6 @@ export default function PhotoStep({
                 </button>
               </div>
 
-              {/* Mensaje de estado */}
               {isCapturing && (
                 <div className="text-center text-white mt-4 text-sm">
                   Capturando foto...
@@ -406,7 +429,6 @@ export default function PhotoStep({
               Fotos ({photos.length})
             </h3>
             
-            {/* Botones de acción */}
             <div className="flex gap-3">
               <button
                 onClick={openCamera}
@@ -438,7 +460,6 @@ export default function PhotoStep({
             </div>
           </div>
 
-          {/* Input oculto para galería */}
           <input
             ref={fileInputRef}
             type="file"
@@ -448,10 +469,9 @@ export default function PhotoStep({
             className="hidden"
           />
 
-          {/* Grid de fotos */}
           {photos.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {photos.map((photo) => (
+              {photos.map((photo, index) => (
                 <div
                   key={photo.id}
                   className="relative group aspect-square rounded-2xl overflow-hidden 
@@ -460,16 +480,15 @@ export default function PhotoStep({
                 >
                   <img
                     src={photo.url}
-                    alt={`Foto ${photo.timestamp}`}
+                    alt={`Foto ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
                   
-                  {/* Overlay con información */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent 
                                 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute bottom-2 left-2 right-2">
                       <p className="text-white text-xs font-medium truncate">
-                        {photo.file.name}
+                        Foto {index + 1}
                       </p>
                       <p className="text-white/70 text-xs">
                         {(photo.file.size / 1024).toFixed(1)} KB
@@ -477,7 +496,6 @@ export default function PhotoStep({
                     </div>
                   </div>
                   
-                  {/* Botón eliminar */}
                   <button
                     onClick={() => handleRemovePhoto(photo.id)}
                     className="absolute top-2 right-2 w-8 h-8 bg-destructive hover:bg-destructive/90 
