@@ -1,4 +1,4 @@
-// src/components/EventDetails.tsx - VERSIÓN SIMPLIFICADA
+// src/components/EventDetails.tsx - VERSIÓN CORREGIDA
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,22 +12,23 @@ interface EventDetailsProps {
 }
 
 export default function EventDetails({ eventType, onDetailsChange, onBack, onNext }: EventDetailsProps) {
+  // Para "intento", automáticamente hayTortuga = false
   const [details, setDetails] = useState({
     // INFORMACIÓN BÁSICA DE UBICACIÓN
     zona_playa: undefined as 'A' | 'B' | 'C' | undefined,
     campamento_id: undefined as number | undefined,
     estacion_baliza: '',
     
-    // AVISTAMIENTO DE TORTUGA
-    hayTortuga: false,
-    especie: '' as 'ei' | 'cm' | 'cc' | undefined, // CORREGIDO según nomenclatura del hotel
+    // AVISTAMIENTO DE TORTUGA (para intento, siempre es false)
+    hayTortuga: eventType === 'intento' ? false : undefined as boolean | undefined,
+    especie: '' as 'ei' | 'cm' | 'cc' | undefined,
     seObservo: false,
     
     // MEDICIONES DE TORTUGA (solo si hay tortuga)
-    lscc: 50, // Largo del caparazón
-    acc: 50,  // Ancho del caparazón
+    lscc: 50,
+    acc: 50,
     
-    // MARCAS Y RECAPTURAS
+    // MARCAS Y RECAPTURAS (solo si hay tortuga)
     marcaPalaceIzq: '',
     marcaPalaceDer: '',
     recapturaPalace: false,
@@ -43,14 +44,13 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
     // ESTADO DEL NIDO (solo para anidación)
     nidoEnPeligro: false,
     motivoTraslado: '' as 'inundacion' | 'depredacion' | 'erosion' | 'otro' | undefined,
-    observacionesTraslado: ''
   });
 
   // Efecto para calcular hora actual por defecto
   useEffect(() => {
     const now = new Date();
     const timeString = now.toTimeString().slice(0, 5);
-    if (!details.horaRecolecta) {
+    if (!details.horaRecolecta && eventType === 'anidacion') {
       updateDetail('horaRecolecta', timeString);
     }
   }, []);
@@ -61,58 +61,60 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
     onDetailsChange(newDetails);
   };
 
-  // Componente para la pregunta sobre la tortuga
+  // Componente para la pregunta sobre la tortuga (NO se muestra para intento)
   const renderPreguntaTortuga = () => (
-    <div className="mb-8">
-      <h3 className="text-lg font-semibold text-foreground mb-4 text-center">
-        ¿Se encontró la tortuga en el lugar?
-      </h3>
-      <div className="flex gap-4 justify-center">
-        <button
-          onClick={() => updateDetail('hayTortuga', true)}
-          className={`px-8 py-4 rounded-2xl font-medium transition-all duration-300 border-2 ${
-            details.hayTortuga 
-              ? 'bg-success/20 text-success border-success/50 shadow-lg scale-105' 
-              : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-              details.hayTortuga ? 'bg-success border-success' : 'border-muted-foreground'
-            }`}>
-              {details.hayTortuga && (
-                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              )}
+    eventType !== 'intento' && (
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold text-foreground mb-4 text-center">
+          ¿Se encontró la tortuga en el lugar?
+        </h3>
+        <div className="flex gap-4 justify-center">
+          <button
+            onClick={() => updateDetail('hayTortuga', true)}
+            className={`px-8 py-4 rounded-2xl font-medium transition-all duration-300 border-2 ${
+              details.hayTortuga 
+                ? 'bg-success/20 text-success border-success/50 shadow-lg scale-105' 
+                : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                details.hayTortuga ? 'bg-success border-success' : 'border-muted-foreground'
+              }`}>
+                {details.hayTortuga && (
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </div>
+              <span>Sí, hay tortuga</span>
             </div>
-            <span>Sí, hay tortuga</span>
-          </div>
-        </button>
+          </button>
 
-        <button
-          onClick={() => updateDetail('hayTortuga', false)}
-          className={`px-8 py-4 rounded-2xl font-medium transition-all duration-300 border-2 ${
-            !details.hayTortuga 
-              ? 'bg-destructive/20 text-destructive border-destructive/50 shadow-lg scale-105' 
-              : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-              !details.hayTortuga ? 'bg-destructive border-destructive' : 'border-muted-foreground'
-            }`}>
-              {!details.hayTortuga && (
-                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              )}
+          <button
+            onClick={() => updateDetail('hayTortuga', false)}
+            className={`px-8 py-4 rounded-2xl font-medium transition-all duration-300 border-2 ${
+              details.hayTortuga === false
+                ? 'bg-destructive/20 text-destructive border-destructive/50 shadow-lg scale-105' 
+                : 'bg-muted/30 text-muted-foreground border-border hover:bg-muted/50'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                details.hayTortuga === false ? 'bg-destructive border-destructive' : 'border-muted-foreground'
+              }`}>
+                {details.hayTortuga === false && (
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </div>
+              <span>No hay tortuga</span>
             </div>
-            <span>No hay tortuga</span>
-          </div>
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
+    )
   );
 
   // Información de especies y zonas
@@ -136,21 +138,24 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
           </select>
         </div>
 
+        {/* Especie solo se muestra si HAY tortuga o es INTENTO (para identificar rastro) */}
         <div>
           <label className="block text-sm font-medium text-foreground mb-2">
-            Especie {details.hayTortuga && '*'}
+            Especie {eventType === 'intento' ? '(del rastro)' : ''}
           </label>
           <select 
             value={details.especie || ''}
             onChange={(e) => updateDetail('especie', e.target.value as 'ei' | 'cm' | 'cc' | undefined)}
-            disabled={!details.hayTortuga}
-            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
           >
             <option value="">Seleccionar especie</option>
             <option value="ei">Eretmochelys imbricata (Carey)</option>
             <option value="cm">Chelonia mydas (Verde)</option>
             <option value="cc">Caretta caretta (Caguama)</option>
           </select>
+          {eventType === 'intento' && (
+            <p className="text-xs text-muted-foreground mt-1">Especie identificada por el rastro</p>
+          )}
         </div>
       </div>
 
@@ -188,9 +193,9 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
     </div>
   );
 
-  // Mediciones de tortuga
+  // Mediciones de tortuga (solo si HAY tortuga, NO para intento)
   const renderMedicionesTortuga = () => (
-    details.hayTortuga && (
+    details.hayTortuga && eventType !== 'intento' && (
       <div className="space-y-6 mb-8 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 border border-emerald-500/20">
         <h4 className="text-lg font-semibold text-foreground text-center mb-4">
           Mediciones de la Tortuga
@@ -261,9 +266,9 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
     )
   );
 
-  // Marcas y recapturas
+  // Marcas y recapturas (solo si HAY tortuga, NO para intento)
   const renderMarcasRecapturas = () => (
-    details.hayTortuga && (
+    details.hayTortuga && eventType !== 'intento' && (
       <div className="space-y-6 mb-8 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-purple-500/20">
         <h4 className="text-lg font-semibold text-foreground text-center mb-4">
           Marcas y Recapturas
@@ -495,10 +500,20 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
       case 'intento':
         return (
           <>
-            {renderPreguntaTortuga()}
+            {/* Para intento: NO pregunta sobre tortuga, pero SÍ pide especie del rastro */}
+            <div className="mb-8 text-center bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-purple-500/20">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-500/20 flex items-center justify-center">
+                <svg className="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Registro de Intento</h3>
+              <p className="text-muted-foreground">
+                Se registra evidencia de intento de anidación sin tortuga presente
+              </p>
+            </div>
             {renderInformacionEspecieZona()}
-            {renderMedicionesTortuga()}
-            {renderMarcasRecapturas()}
+            {/* NO se muestran mediciones ni marcas para intento */}
           </>
         );
       
@@ -514,7 +529,9 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
           Detalles del Evento - {eventType === 'anidacion' ? 'Anidación' : eventType === 'arqueo' ? 'Arqueo' : 'Intento'}
         </h2>
         <p className="text-muted-foreground">
-          Complete la información específica del avistamiento
+          {eventType === 'intento' 
+            ? 'Registro de evidencia de intento de anidación' 
+            : 'Complete la información específica del evento'}
         </p>
       </div>
       

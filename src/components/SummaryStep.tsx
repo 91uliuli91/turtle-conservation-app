@@ -1,4 +1,4 @@
-// src/components/SummaryStep.tsx - VERSIÓN COMPLETA CON TODA LA INFORMACIÓN
+// src/components/SummaryStep.tsx - VERSIÓN CORREGIDA PARA INTENTO
 "use client"
 
 import '../app/globals.css';
@@ -107,6 +107,14 @@ export default function SummaryStep({
     return timeString;
   }
 
+  // Función para determinar si hay tortuga (lógica corregida para intento)
+  const hayTortuga = () => {
+    if (eventData.type === 'intento') {
+      return false; // Intento siempre es sin tortuga
+    }
+    return eventData.details?.hayTortuga || false;
+  }
+
   return (
     <div className="flex flex-col h-full animate-fadeInUp">
       <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50">
@@ -189,7 +197,9 @@ export default function SummaryStep({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Ubicación y Especie</h3>
+              <h3 className="text-xl font-semibold text-foreground">
+                {eventData.type === 'intento' ? 'Ubicación del Intento' : 'Ubicación y Especie'}
+              </h3>
             </div>
             
             <div className="space-y-4">
@@ -214,14 +224,24 @@ export default function SummaryStep({
                 </div>
               )}
 
-              <div className="flex justify-between items-center py-2 border-b border-border/30">
-                <span className="text-muted-foreground font-medium">¿Se encontró tortuga?:</span>
-                <span className="font-semibold text-foreground">{eventData.details.hayTortuga ? 'Sí' : 'No'}</span>
-              </div>
+              {/* Para intento: Mensaje específico */}
+              {eventData.type === 'intento' ? (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Tipo de registro:</span>
+                  <span className="font-semibold text-foreground">Intento de anidación (sin tortuga)</span>
+                </div>
+              ) : (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">¿Se encontró tortuga?:</span>
+                  <span className="font-semibold text-foreground">{hayTortuga() ? 'Sí' : 'No'}</span>
+                </div>
+              )}
 
-              {eventData.details.hayTortuga && eventData.details.especie && (
+              {eventData.details.especie && (
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-muted-foreground font-medium">Especie:</span>
+                  <span className="text-muted-foreground font-medium">
+                    {eventData.type === 'intento' ? 'Especie (del rastro):' : 'Especie:'}
+                  </span>
                   <span className="font-semibold text-foreground">{getEspecieName(eventData.details.especie)}</span>
                 </div>
               )}
@@ -229,8 +249,8 @@ export default function SummaryStep({
           </div>
         )}
 
-        {/* Información de la Tortuga */}
-        {eventData.details?.hayTortuga && (
+        {/* Información de la Tortuga (solo si HAY tortuga y NO es intento) */}
+        {hayTortuga() && eventData.type !== 'intento' && (
           <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 mb-6 border border-emerald-500/20">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -252,10 +272,12 @@ export default function SummaryStep({
                 <span className="font-semibold text-foreground">{eventData.details.acc} cm</span>
               </div>
 
-              <div className="flex justify-between items-center py-2 border-b border-border/30">
-                <span className="text-muted-foreground font-medium">Se observó anidación:</span>
-                <span className="font-semibold text-foreground">{eventData.details.seObservo ? 'Sí' : 'No'}</span>
-              </div>
+              {eventData.details.seObservo !== undefined && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Se observó anidación:</span>
+                  <span className="font-semibold text-foreground">{eventData.details.seObservo ? 'Sí' : 'No'}</span>
+                </div>
+              )}
 
               {/* Marcas Palace */}
               {(eventData.details.marcaPalaceIzq || eventData.details.marcaPalaceDer) && (
@@ -309,7 +331,7 @@ export default function SummaryStep({
           </div>
         )}
 
-        {/* Detalles de Anidación */}
+        {/* Detalles de Anidación (solo para anidación) */}
         {eventData.type === "anidacion" && (
           <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 mb-6 border border-purple-500/20">
             <div className="flex items-center gap-3 mb-4">
