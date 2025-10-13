@@ -1,7 +1,7 @@
-// src/components/EventDetails.tsx - VERSIÓN MODIFICADA
+// src/components/EventDetails.tsx - VERSIÓN SIMPLIFICADA
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../app/globals.css';
 
 interface EventDetailsProps {
@@ -13,22 +13,47 @@ interface EventDetailsProps {
 
 export default function EventDetails({ eventType, onDetailsChange, onBack, onNext }: EventDetailsProps) {
   const [details, setDetails] = useState({
-    // NUEVO CAMPO: Controla si hay tortuga en el lugar
-    hayTortuga: false,
-    
-    numeroHuevos: 50,
-    largoCaparazon: 50,
-    anchoCaparazon: 50,
-    observaciones: '',
-    seColocoMarca: false,
-    seRemarco: false,
-    
-    // Campos para la API
-    campamento_id: undefined as number | undefined,
+    // INFORMACIÓN BÁSICA DE UBICACIÓN
     zona_playa: undefined as 'A' | 'B' | 'C' | undefined,
+    campamento_id: undefined as number | undefined,
     estacion_baliza: '',
-    tortuga_id: undefined as number | undefined
+    
+    // AVISTAMIENTO DE TORTUGA
+    hayTortuga: false,
+    especie: '' as 'ei' | 'cm' | 'cc' | undefined, // CORREGIDO según nomenclatura del hotel
+    seObservo: false,
+    
+    // MEDICIONES DE TORTUGA (solo si hay tortuga)
+    lscc: 50, // Largo del caparazón
+    acc: 50,  // Ancho del caparazón
+    
+    // MARCAS Y RECAPTURAS
+    marcaPalaceIzq: '',
+    marcaPalaceDer: '',
+    recapturaPalace: false,
+    numeroSerieRecaptura: '',
+    marcaExternaIzq: '',
+    marcaExternaDer: '',
+    
+    // PROCESO DE RECOLECCIÓN (solo para anidación)
+    horaRecolecta: '',
+    tamanoNidada: 50,
+    procedenciaHuevos: '' as 'nido_original' | 'traslado' | 'rescate' | undefined,
+    
+    // ESTADO DEL NIDO (solo para anidación)
+    nidoEnPeligro: false,
+    motivoTraslado: '' as 'inundacion' | 'depredacion' | 'erosion' | 'otro' | undefined,
+    observacionesTraslado: ''
   });
+
+  // Efecto para calcular hora actual por defecto
+  useEffect(() => {
+    const now = new Date();
+    const timeString = now.toTimeString().slice(0, 5);
+    if (!details.horaRecolecta) {
+      updateDetail('horaRecolecta', timeString);
+    }
+  }, []);
 
   const updateDetail = (field: string, value: any) => {
     const newDetails = { ...details, [field]: value };
@@ -90,348 +115,411 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
     </div>
   );
 
-  const renderCamposAdicionales = () => (
-    <div className="space-y-4 mt-6">
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Campamento
-        </label>
-        <select 
-          value={details.campamento_id || ''}
-          onChange={(e) => updateDetail('campamento_id', e.target.value ? Number(e.target.value) : undefined)}
-          className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
-        >
-          <option value="">Seleccionar campamento</option>
-          <option value="1">Campamento Norte</option>
-          <option value="2">Campamento Sur</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Zona de Playa
-        </label>
-        <select 
-          value={details.zona_playa || ''}
-          onChange={(e) => updateDetail('zona_playa', e.target.value as 'A' | 'B' | 'C' | undefined)}
-          className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
-        >
-          <option value="">Seleccionar zona</option>
-          <option value="A">Zona A</option>
-          <option value="B">Zona B</option>
-          <option value="C">Zona C</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Estación/Baliza
-        </label>
-        <input
-          type="text"
-          value={details.estacion_baliza}
-          onChange={(e) => updateDetail('estacion_baliza', e.target.value)}
-          placeholder="Ej: EST-001"
-          className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
-        />
-      </div>
-    </div>
-  );
-
-  const renderAnidacionFields = () => (
-    <div className="space-y-8">
-      {/* Pregunta sobre tortuga para anidación */}
-      {renderPreguntaTortuga()}
-
-      {/* Campos de mediciones SOLO si hay tortuga */}
-      {details.hayTortuga && (
-        <div className="space-y-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 border border-emerald-500/20">
-          <h4 className="text-lg font-semibold text-foreground text-center mb-4">
-            Mediciones de la Tortuga
-          </h4>
-          
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <label className="text-lg font-light text-foreground">
-                Largo del caparazón
-              </label>
-              <span className="text-2xl font-light text-foreground">
-                {details.largoCaparazon} cm
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="250"
-              value={details.largoCaparazon}
-              onChange={(e) => updateDetail('largoCaparazon', Number(e.target.value))}
-              className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb"
-            />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <label className="text-lg font-light text-foreground">
-                Ancho del caparazón
-              </label>
-              <span className="text-2xl font-light text-foreground">
-                {details.anchoCaparazon} cm
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="250"
-              value={details.anchoCaparazon}
-              onChange={(e) => updateDetail('anchoCaparazon', Number(e.target.value))}
-              className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb"
-            />
-          </div>
-
-          <div className="space-y-4">
-            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
-                            hover:bg-muted/50 transition-all duration-200">
-              <input
-                type="checkbox"
-                checked={details.seColocoMarca}
-                onChange={(e) => updateDetail('seColocoMarca', e.target.checked)}
-                className="w-5 h-5 text-primary bg-muted border-border 
-                        rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-foreground font-light">Se colocó marca nueva</span>
-            </label>
-            
-            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
-                            hover:bg-muted/50 transition-all duration-200">
-              <input
-                type="checkbox"
-                checked={details.seRemarco}
-                onChange={(e) => updateDetail('seRemarco', e.target.checked)}
-                className="w-5 h-5 text-primary bg-muted border-border 
-                        rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-foreground font-light">Se remarcó</span>
-            </label>
-          </div>
-        </div>
-      )}
-
-      {/* Número de huevos (siempre visible para anidación) */}
-      <div className="text-center bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 border border-blue-500/20">
-        <label className="block text-lg font-light text-foreground mb-6">
-          Número de Huevos
-        </label>
-        <div className="flex items-center justify-center gap-8">
-          <button
-            className="w-14 h-14 bg-muted/50 hover:bg-muted rounded-full 
-                    text-2xl font-light text-foreground transition-all duration-200
-                    shadow-lg hover:shadow-xl pb-4 border border-border"
-            onClick={() => updateDetail('numeroHuevos', Math.max(0, details.numeroHuevos - 1))}
+  // Información de especies y zonas
+  const renderInformacionEspecieZona = () => (
+    <div className="space-y-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Zona de Playa *
+          </label>
+          <select 
+            value={details.zona_playa || ''}
+            onChange={(e) => updateDetail('zona_playa', e.target.value as 'A' | 'B' | 'C' | undefined)}
+            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+            required
           >
-            −
-          </button>
-          <div className="text-4xl font-light text-foreground w-20 text-center">
-            {details.numeroHuevos}
-          </div>
-          <button
-            className="w-14 h-14 bg-muted/50 hover:bg-muted rounded-full 
-                    text-2xl font-light text-foreground transition-all duration-200
-                    shadow-lg hover:shadow-xl border border-border"
-            onClick={() => updateDetail('numeroHuevos', details.numeroHuevos + 1)}
-          >
-            +
-          </button>
+            <option value="">Seleccionar zona</option>
+            <option value="A">Zona A</option>
+            <option value="B">Zona B</option>
+            <option value="C">Zona C</option>
+          </select>
         </div>
-        <input
-          type="range"
-          min="0"
-          max="300"
-          value={details.numeroHuevos}
-          onChange={(e) => updateDetail('numeroHuevos', Number(e.target.value))}
-          className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb mt-4"
-        />
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Especie {details.hayTortuga && '*'}
+          </label>
+          <select 
+            value={details.especie || ''}
+            onChange={(e) => updateDetail('especie', e.target.value as 'ei' | 'cm' | 'cc' | undefined)}
+            disabled={!details.hayTortuga}
+            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="">Seleccionar especie</option>
+            <option value="ei">Eretmochelys imbricata (Carey)</option>
+            <option value="cm">Chelonia mydas (Verde)</option>
+            <option value="cc">Caretta caretta (Caguama)</option>
+          </select>
+        </div>
       </div>
 
-      {renderCamposAdicionales()}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Campamento
+          </label>
+          <select 
+            value={details.campamento_id || ''}
+            onChange={(e) => updateDetail('campamento_id', e.target.value ? Number(e.target.value) : undefined)}
+            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+          >
+            <option value="">Seleccionar campamento</option>
+            <option value="1">Campamento Norte</option>
+            <option value="2">Campamento Sur</option>
+            <option value="3">Campamento Este</option>
+            <option value="4">Campamento Oeste</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Estación/Baliza
+          </label>
+          <input
+            type="text"
+            value={details.estacion_baliza}
+            onChange={(e) => updateDetail('estacion_baliza', e.target.value)}
+            placeholder="Ej: EST-001, BAL-025"
+            className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+          />
+        </div>
+      </div>
     </div>
   );
 
-  const renderArqueoFields = () => (
-    <div className="space-y-8">
-      {/* Pregunta sobre tortuga para arqueo */}
-      {renderPreguntaTortuga()}
-
-      {/* Campos de mediciones SOLO si hay tortuga */}
-      {details.hayTortuga && (
-        <div className="space-y-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 border border-emerald-500/20">
-          <h4 className="text-lg font-semibold text-foreground text-center mb-4">
-            Mediciones de la Tortuga
-          </h4>
-          
+  // Mediciones de tortuga
+  const renderMedicionesTortuga = () => (
+    details.hayTortuga && (
+      <div className="space-y-6 mb-8 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 border border-emerald-500/20">
+        <h4 className="text-lg font-semibold text-foreground text-center mb-4">
+          Mediciones de la Tortuga
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <div className="flex justify-between items-center mb-4">
               <label className="text-lg font-light text-foreground">
-                Largo del caparazón
+                LSCC (Largo caparazón)
               </label>
               <span className="text-2xl font-light text-foreground">
-                {details.largoCaparazon} cm
+                {details.lscc} cm
               </span>
             </div>
             <input
               type="range"
-              min="0"
-              max="250"
-              value={details.largoCaparazon}
-              onChange={(e) => updateDetail('largoCaparazon', Number(e.target.value))}
+              min="20"
+              max="150"
+              value={details.lscc}
+              onChange={(e) => updateDetail('lscc', Number(e.target.value))}
               className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb"
             />
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>20 cm</span>
+              <span>150 cm</span>
+            </div>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-4">
               <label className="text-lg font-light text-foreground">
-                Ancho del caparazón
+                ACC (Ancho caparazón)
               </label>
               <span className="text-2xl font-light text-foreground">
-                {details.anchoCaparazon} cm
+                {details.acc} cm
               </span>
             </div>
             <input
               type="range"
-              min="0"
-              max="250"
-              value={details.anchoCaparazon}
-              onChange={(e) => updateDetail('anchoCaparazon', Number(e.target.value))}
+              min="20"
+              max="120"
+              value={details.acc}
+              onChange={(e) => updateDetail('acc', Number(e.target.value))}
               className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb"
             />
-          </div>
-
-          <div className="space-y-4">
-            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
-                            hover:bg-muted/50 transition-all duration-200">
-              <input
-                type="checkbox"
-                checked={details.seColocoMarca}
-                onChange={(e) => updateDetail('seColocoMarca', e.target.checked)}
-                className="w-5 h-5 text-primary bg-muted border-border 
-                        rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-foreground font-light">Se colocó marca nueva</span>
-            </label>
-            
-            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
-                            hover:bg-muted/50 transition-all duration-200">
-              <input
-                type="checkbox"
-                checked={details.seRemarco}
-                onChange={(e) => updateDetail('seRemarco', e.target.checked)}
-                className="w-5 h-5 text-primary bg-muted border-border 
-                        rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-foreground font-light">Se remarcó</span>
-            </label>
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>20 cm</span>
+              <span>120 cm</span>
+            </div>
           </div>
         </div>
-      )}
 
-      {renderCamposAdicionales()}
-    </div>
+        <div className="space-y-4">
+          <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
+                          hover:bg-muted/50 transition-all duration-200">
+            <input
+              type="checkbox"
+              checked={details.seObservo}
+              onChange={(e) => updateDetail('seObservo', e.target.checked)}
+              className="w-5 h-5 text-primary bg-muted border-border 
+                      rounded focus:ring-primary focus:ring-2"
+            />
+            <span className="text-foreground font-light">Se observó comportamiento de anidación</span>
+          </label>
+        </div>
+      </div>
+    )
   );
 
-  const renderIntentoFields = () => (
-    <div className="space-y-8">
-      {/* Pregunta sobre tortuga para intento */}
-      {renderPreguntaTortuga()}
-
-      {/* Campos de mediciones SOLO si hay tortuga */}
-      {details.hayTortuga && (
-        <div className="space-y-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 border border-emerald-500/20">
-          <h4 className="text-lg font-semibold text-foreground text-center mb-4">
-            Mediciones de la Tortuga
-          </h4>
-          
+  // Marcas y recapturas
+  const renderMarcasRecapturas = () => (
+    details.hayTortuga && (
+      <div className="space-y-6 mb-8 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-purple-500/20">
+        <h4 className="text-lg font-semibold text-foreground text-center mb-4">
+          Marcas y Recapturas
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <label className="text-lg font-light text-foreground">
-                Largo del caparazón
-              </label>
-              <span className="text-2xl font-light text-foreground">
-                {details.largoCaparazon} cm
-              </span>
-            </div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Marca Palace - Aleta Izquierda
+            </label>
             <input
-              type="range"
-              min="0"
-              max="250"
-              value={details.largoCaparazon}
-              onChange={(e) => updateDetail('largoCaparazon', Number(e.target.value))}
-              className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb"
+              type="text"
+              value={details.marcaPalaceIzq}
+              onChange={(e) => updateDetail('marcaPalaceIzq', e.target.value)}
+              placeholder="Ej: P-1234"
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
             />
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <label className="text-lg font-light text-foreground">
-                Ancho del caparazón
-              </label>
-              <span className="text-2xl font-light text-foreground">
-                {details.anchoCaparazon} cm
-              </span>
-            </div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Marca Palace - Aleta Derecha
+            </label>
             <input
-              type="range"
-              min="0"
-              max="250"
-              value={details.anchoCaparazon}
-              onChange={(e) => updateDetail('anchoCaparazon', Number(e.target.value))}
-              className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb"
+              type="text"
+              value={details.marcaPalaceDer}
+              onChange={(e) => updateDetail('marcaPalaceDer', e.target.value)}
+              placeholder="Ej: P-1235"
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
             />
-          </div>
-
-          <div className="space-y-4">
-            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
-                            hover:bg-muted/50 transition-all duration-200">
-              <input
-                type="checkbox"
-                checked={details.seColocoMarca}
-                onChange={(e) => updateDetail('seColocoMarca', e.target.checked)}
-                className="w-5 h-5 text-primary bg-muted border-border 
-                        rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-foreground font-light">Se colocó marca nueva</span>
-            </label>
-            
-            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
-                            hover:bg-muted/50 transition-all duration-200">
-              <input
-                type="checkbox"
-                checked={details.seRemarco}
-                onChange={(e) => updateDetail('seRemarco', e.target.checked)}
-                className="w-5 h-5 text-primary bg-muted border-border 
-                        rounded focus:ring-primary focus:ring-2"
-              />
-              <span className="text-foreground font-light">Se remarcó</span>
-            </label>
           </div>
         </div>
-      )}
 
-      {renderCamposAdicionales()}
-    </div>
+        <div className="space-y-4">
+          <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
+                          hover:bg-muted/50 transition-all duration-200">
+            <input
+              type="checkbox"
+              checked={details.recapturaPalace}
+              onChange={(e) => updateDetail('recapturaPalace', e.target.checked)}
+              className="w-5 h-5 text-primary bg-muted border-border 
+                      rounded focus:ring-primary focus:ring-2"
+            />
+            <span className="text-foreground font-light">Es una recaptura Palace</span>
+          </label>
+        </div>
+
+        {details.recapturaPalace && (
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Número de Serie Recaptura
+            </label>
+            <input
+              type="text"
+              value={details.numeroSerieRecaptura}
+              onChange={(e) => updateDetail('numeroSerieRecaptura', e.target.value)}
+              placeholder="Ej: REC-2024-001"
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Marca Externa - Aleta Izquierda
+            </label>
+            <input
+              type="text"
+              value={details.marcaExternaIzq}
+              onChange={(e) => updateDetail('marcaExternaIzq', e.target.value)}
+              placeholder="Ej: EXT-A1"
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Marca Externa - Aleta Derecha
+            </label>
+            <input
+              type="text"
+              value={details.marcaExternaDer}
+              onChange={(e) => updateDetail('marcaExternaDer', e.target.value)}
+              placeholder="Ej: EXT-B2"
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+            />
+          </div>
+        </div>
+      </div>
+    )
   );
+
+  // Información de recolección (solo para anidación)
+  const renderRecoleccionHuevos = () => (
+    eventType === 'anidacion' && (
+      <div className="space-y-6 mb-8 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 border border-blue-500/20">
+        <h4 className="text-lg font-semibold text-foreground text-center mb-4">
+          Recolección de Huevos
+        </h4>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Hora de Recolección *
+            </label>
+            <input
+              type="time"
+              value={details.horaRecolecta}
+              onChange={(e) => updateDetail('horaRecolecta', e.target.value)}
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">
+              Procedencia de Huevos
+            </label>
+            <select 
+              value={details.procedenciaHuevos || ''}
+              onChange={(e) => updateDetail('procedenciaHuevos', e.target.value as 'nido_original' | 'traslado' | 'rescate' | undefined)}
+              className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 outline-none"
+            >
+              <option value="">Seleccionar procedencia</option>
+              <option value="nido_original">Nido original en playa</option>
+              <option value="traslado">Traslado por peligro</option>
+              <option value="rescate">Rescate de nido erosionado</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <label className="block text-lg font-light text-foreground mb-6">
+            Tamaño de Nidada
+          </label>
+          <div className="flex items-center justify-center gap-8">
+            <button
+              className="w-14 h-14 bg-muted/50 hover:bg-muted rounded-full 
+                      text-2xl font-light text-foreground transition-all duration-200
+                      shadow-lg hover:shadow-xl pb-4 border border-border"
+              onClick={() => updateDetail('tamanoNidada', Math.max(0, details.tamanoNidada - 1))}
+            >
+              −
+            </button>
+            <div className="text-4xl font-light text-foreground w-20 text-center">
+              {details.tamanoNidada}
+            </div>
+            <button
+              className="w-14 h-14 bg-muted/50 hover:bg-muted rounded-full 
+                      text-2xl font-light text-foreground transition-all duration-200
+                      shadow-lg hover:shadow-xl border border-border"
+              onClick={() => updateDetail('tamanoNidada', details.tamanoNidada + 1)}
+            >
+              +
+            </button>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="250"
+            value={details.tamanoNidada}
+            onChange={(e) => updateDetail('tamanoNidada', Number(e.target.value))}
+            className="w-full h-2 bg-muted/50 rounded-lg appearance-none cursor-pointer slider-thumb mt-4"
+          />
+        </div>
+
+        {/* Información adicional para traslados */}
+        {details.procedenciaHuevos === 'traslado' && (
+          <div className="space-y-4 mt-4 p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
+            <label className="flex items-center gap-4 p-4 bg-muted/30 rounded-xl cursor-pointer
+                            hover:bg-muted/50 transition-all duration-200">
+              <input
+                type="checkbox"
+                checked={details.nidoEnPeligro}
+                onChange={(e) => updateDetail('nidoEnPeligro', e.target.checked)}
+                className="w-5 h-5 text-orange-500 bg-muted border-border 
+                        rounded focus:ring-orange-500 focus:ring-2"
+              />
+              <span className="text-foreground font-light">Nido en situación de peligro</span>
+            </label>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Motivo de Traslado
+              </label>
+              <select 
+                value={details.motivoTraslado || ''}
+                onChange={(e) => updateDetail('motivoTraslado', e.target.value as 'inundacion' | 'depredacion' | 'erosion' | 'otro' | undefined)}
+                className="w-full p-3 bg-muted/30 border border-border rounded-xl text-foreground focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-200 outline-none"
+              >
+                <option value="">Seleccionar motivo</option>
+                <option value="inundacion">Riesgo de inundación</option>
+                <option value="depredacion">Amenaza de depredación</option>
+                <option value="erosion">Erosión de playa</option>
+                <option value="otro">Otro motivo</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  );
+
+  // Render principal condicional por tipo de evento
+  const renderPorTipoEvento = () => {
+    switch (eventType) {
+      case 'anidacion':
+        return (
+          <>
+            {renderPreguntaTortuga()}
+            {renderInformacionEspecieZona()}
+            {renderMedicionesTortuga()}
+            {renderMarcasRecapturas()}
+            {renderRecoleccionHuevos()}
+          </>
+        );
+      
+      case 'arqueo':
+        return (
+          <>
+            {renderPreguntaTortuga()}
+            {renderInformacionEspecieZona()}
+            {renderMedicionesTortuga()}
+            {renderMarcasRecapturas()}
+          </>
+        );
+      
+      case 'intento':
+        return (
+          <>
+            {renderPreguntaTortuga()}
+            {renderInformacionEspecieZona()}
+            {renderMedicionesTortuga()}
+            {renderMarcasRecapturas()}
+          </>
+        );
+      
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="flex flex-col px-6 py-8 animate-fadeIn bg-card rounded-3xl p-8 shadow-xl border border-border/50 max-w-4xl mx-auto">
+    <div className="flex flex-col animate-fadeIn bg-card rounded-3xl p-8 shadow-xl border border-border/50 max-w-4xl mx-auto">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-light text-foreground mb-2">
-          Detalles del Evento
+          Detalles del Evento - {eventType === 'anidacion' ? 'Anidación' : eventType === 'arqueo' ? 'Arqueo' : 'Intento'}
         </h2>
+        <p className="text-muted-foreground">
+          Complete la información específica del avistamiento
+        </p>
       </div>
       
-      <div className="mb-8 flex-1">
-        {eventType === 'anidacion' && renderAnidacionFields()}
-        {eventType === 'arqueo' && renderArqueoFields()}
-        {eventType === 'intento' && renderIntentoFields()}
+      <div className="mb-8 flex-1 space-y-6">
+        {renderPorTipoEvento()}
       </div>
 
       <div className="flex gap-3">
