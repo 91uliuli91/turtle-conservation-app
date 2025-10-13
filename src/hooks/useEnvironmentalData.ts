@@ -1,4 +1,3 @@
-// src/hooks/useEnvironmentalData.ts - VERSIÓN CON CACHE INTELIGENTE
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -27,7 +26,7 @@ export function useEnvironmentalData(autoRefresh = true) {
   const [error, setError] = useState<string | null>(null);
   const [usingCache, setUsingCache] = useState(false);
 
-  // Sistema de cache inteligente
+  // 🔄 Sistema de cache inteligente
   const getCachedData = (lat: number, lon: number): EnvironmentalData | null => {
     try {
       const cachedRaw = localStorage.getItem(CACHE_CONFIG.KEY);
@@ -37,7 +36,7 @@ export function useEnvironmentalData(autoRefresh = true) {
       
       // Validar estructura del cache
       if (!cached.data || !cached.timestamp || !cached.location) {
-        console.warn('Cache corrupto, eliminando...');
+        console.warn('📦 Cache corrupto, eliminando...');
         localStorage.removeItem(CACHE_CONFIG.KEY);
         return null;
       }
@@ -51,16 +50,16 @@ export function useEnvironmentalData(autoRefresh = true) {
       const isRecent = Date.now() - cached.timestamp < CACHE_CONFIG.DURATION;
       
       if (isSameLocation && isRecent) {
-        console.log('Usando datos cacheados (rápido)');
+        console.log('📦 Usando datos cacheados (rápido)');
         setUsingCache(true);
         return cached.data;
       } else if (!isRecent) {
-        console.log('Cache expirado, actualizando...');
+        console.log('🕐 Cache expirado, actualizando...');
       } else {
-        console.log('Ubicación cambiada, nuevo fetch...');
+        console.log('📍 Ubicación cambiada, nuevo fetch...');
       }
     } catch (err) {
-      console.warn('Error al leer cache:', err);
+      console.warn('❌ Error al leer cache:', err);
       // Limpiar cache corrupto
       localStorage.removeItem(CACHE_CONFIG.KEY);
     }
@@ -78,26 +77,28 @@ export function useEnvironmentalData(autoRefresh = true) {
         version: '1.0' // Para futuras migraciones
       };
       localStorage.setItem(CACHE_CONFIG.KEY, JSON.stringify(cacheData));
-      console.log('Datos guardados en cache');
+      console.log('💾 Datos guardados en cache');
     } catch (err) {
-      console.warn('No se pudo guardar en cache (modo privado?)');
+      console.warn('⚠️ No se pudo guardar en cache (modo privado?)');
     }
   };
 
-  // Función principal para obtener datos
+  // 🚀 Función principal para obtener datos - CORREGIDA
   const fetchEnvironmentalData = async (lat: number, lon: number) => {
+    // Obtener datos cacheados ANTES del try para que esté disponible en el catch
+    const cachedData = getCachedData(lat, lon);
+    
     try {
       setLoading(true);
       setError(null);
       
-      // 1. Intentar obtener datos cacheados primero (para respuesta instantánea)
-      const cachedData = getCachedData(lat, lon);
+      // 1. Mostrar datos cacheados inmediatamente si existen
       if (cachedData) {
         setData(cachedData);
         setLoading(false); // Mostrar datos cacheados inmediatamente
       }
       
-      console.log('Obteniendo datos ambientales actualizados...');
+      console.log('🔄 Obteniendo datos ambientales actualizados...');
       
       // 2. Obtener datos frescos (siempre)
       const environmentalData = await weatherService.getEnvironmentalData(lat, lon);
@@ -110,11 +111,12 @@ export function useEnvironmentalData(autoRefresh = true) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido al obtener datos ambientales';
       setError(errorMessage);
-      console.error('Error en useEnvironmentalData:', err);
+      console.error('❌ Error en useEnvironmentalData:', err);
       
+      // ✅ CORREGIDO: cachedData ya está definido en este scope
       // Si hay error pero tenemos cache, mantener los datos cacheados
       if (!data && cachedData) {
-        console.log('Usando cache como fallback por error');
+        console.log('🛡️ Usando cache como fallback por error');
         setData(cachedData);
         setError(null); // Limpiar error si tenemos cache de respaldo
       }
@@ -133,11 +135,11 @@ export function useEnvironmentalData(autoRefresh = true) {
     }
   }, [deviceLocation, locationLoading, locationError]);
 
-  //  Auto-refresh cada 30 minutos (opcional)
+  // 🔄 Auto-refresh cada 30 minutos (opcional)
   useEffect(() => {
     if (deviceLocation && autoRefresh && !usingCache) {
       const interval = setInterval(() => {
-        console.log('Actualización automática de datos ambientales');
+        console.log('🔄 Actualización automática de datos ambientales');
         fetchEnvironmentalData(deviceLocation.lat, deviceLocation.lon);
       }, 30 * 60 * 1000); // 30 minutos
       
@@ -145,10 +147,10 @@ export function useEnvironmentalData(autoRefresh = true) {
     }
   }, [deviceLocation, autoRefresh, usingCache]);
 
-  // Función para re-forzar la actualización
+  // 🔁 Función para re-forzar la actualización
   const refetch = async () => {
     if (deviceLocation) {
-      console.log('Re-forzando actualización...');
+      console.log('🔄 Re-forzando actualización...');
       // Limpiar cache para forzar fetch nuevo
       localStorage.removeItem(CACHE_CONFIG.KEY);
       setUsingCache(false);
