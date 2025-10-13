@@ -1,4 +1,4 @@
-// src/components/SummaryStep.tsx 
+// src/components/SummaryStep.tsx - VERSIÓN COMPLETA CON TODA LA INFORMACIÓN
 "use client"
 
 import '../app/globals.css';
@@ -9,9 +9,9 @@ interface SummaryStepProps {
   eventData: any
   onBack: () => void
   onSave: () => void
-  onCancel: () => void // Nueva prop para cancelar completamente
+  onCancel: () => void
   isSaving: boolean
-  saveError?: string | null // Nueva prop para manejar errores
+  saveError?: string | null
 }
 
 export default function SummaryStep({ 
@@ -55,6 +55,58 @@ export default function SummaryStep({
     return names[type] || type
   }
 
+  const getEspecieName = (especie: string) => {
+    const names: { [key: string]: string } = {
+      ei: "Eretmochelys imbricata (Carey)",
+      cm: "Chelonia mydas (Verde)",
+      cc: "Caretta caretta (Caguama)",
+    }
+    return names[especie] || especie
+  }
+
+  const getZonaName = (zona: string) => {
+    const names: { [key: string]: string } = {
+      A: "Zona A",
+      B: "Zona B", 
+      C: "Zona C",
+    }
+    return names[zona] || zona
+  }
+
+  const getProcedenciaName = (procedencia: string) => {
+    const names: { [key: string]: string } = {
+      nido_original: "Nido original en playa",
+      traslado: "Traslado por peligro",
+      rescate: "Rescate de nido erosionado",
+    }
+    return names[procedencia] || procedencia
+  }
+
+  const getMotivoTrasladoName = (motivo: string) => {
+    const names: { [key: string]: string } = {
+      inundacion: "Riesgo de inundación",
+      depredacion: "Amenaza de depredación",
+      erosion: "Erosión de playa",
+      otro: "Otro motivo",
+    }
+    return names[motivo] || motivo
+  }
+
+  const getCampamentoName = (id: number) => {
+    const names: { [key: string]: string } = {
+      1: "Campamento Norte",
+      2: "Campamento Sur",
+      3: "Campamento Este",
+      4: "Campamento Oeste",
+    }
+    return names[id] || `Campamento ${id}`
+  }
+
+  const formatTime = (timeString: string) => {
+    if (!timeString) return 'No registrada';
+    return timeString;
+  }
+
   return (
     <div className="flex flex-col h-full animate-fadeInUp">
       <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50">
@@ -63,7 +115,7 @@ export default function SummaryStep({
             {saveError ? "Error al Guardar" : "Resumen del Evento"}
           </h2>
           <p className="text-muted-foreground text-lg">
-            {saveError ? "No se pudo guardar el evento" : "Revisa la información antes de guardar"}
+            {saveError ? "No se pudo guardar el evento" : "Revisa toda la información antes de guardar"}
           </p>
         </div>
 
@@ -127,8 +179,58 @@ export default function SummaryStep({
           </div>
         </div>
 
-        {/* Detalles de Anidación */}
-        {eventData.type === "anidacion" && eventData.details?.numeroHuevos && (
+        {/* Información de Ubicación y Especie */}
+        {eventData.details && (
+          <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 mb-6 border border-blue-500/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-foreground">Ubicación y Especie</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {eventData.details.zona_playa && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Zona de Playa:</span>
+                  <span className="font-semibold text-foreground">{getZonaName(eventData.details.zona_playa)}</span>
+                </div>
+              )}
+
+              {eventData.details.campamento_id && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Campamento:</span>
+                  <span className="font-semibold text-foreground">{getCampamentoName(eventData.details.campamento_id)}</span>
+                </div>
+              )}
+
+              {eventData.details.estacion_baliza && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Estación/Baliza:</span>
+                  <span className="font-semibold text-foreground">{eventData.details.estacion_baliza}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center py-2 border-b border-border/30">
+                <span className="text-muted-foreground font-medium">¿Se encontró tortuga?:</span>
+                <span className="font-semibold text-foreground">{eventData.details.hayTortuga ? 'Sí' : 'No'}</span>
+              </div>
+
+              {eventData.details.hayTortuga && eventData.details.especie && (
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-muted-foreground font-medium">Especie:</span>
+                  <span className="font-semibold text-foreground">{getEspecieName(eventData.details.especie)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Información de la Tortuga */}
+        {eventData.details?.hayTortuga && (
           <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 mb-6 border border-emerald-500/20">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -136,47 +238,139 @@ export default function SummaryStep({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-foreground">Detalles de Anidación</h3>
-            </div>
-            
-            <div className="flex justify-between items-center py-2">
-              <span className="text-muted-foreground font-medium">Número de Huevos:</span>
-              <span className="font-semibold text-foreground text-2xl">{eventData.details.numeroHuevos}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Mediciones */}
-        {(eventData.type === "arqueo" || eventData.type === "anidacion") && (
-          <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 mb-6 border border-blue-500/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground">Mediciones</h3>
+              <h3 className="text-xl font-semibold text-foreground">Información de la Tortuga</h3>
             </div>
             
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2 border-b border-border/30">
-                <span className="text-muted-foreground font-medium">Largo del caparazón:</span>
-                <span className="font-semibold text-foreground">{eventData.details.largoCaparazon} cm</span>
+                <span className="text-muted-foreground font-medium">LSCC (Largo caparazón):</span>
+                <span className="font-semibold text-foreground">{eventData.details.lscc} cm</span>
               </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-muted-foreground font-medium">Ancho del caparazón:</span>
-                <span className="font-semibold text-foreground">{eventData.details.anchoCaparazon} cm</span>
+
+              <div className="flex justify-between items-center py-2 border-b border-border/30">
+                <span className="text-muted-foreground font-medium">ACC (Ancho caparazón):</span>
+                <span className="font-semibold text-foreground">{eventData.details.acc} cm</span>
               </div>
+
+              <div className="flex justify-between items-center py-2 border-b border-border/30">
+                <span className="text-muted-foreground font-medium">Se observó anidación:</span>
+                <span className="font-semibold text-foreground">{eventData.details.seObservo ? 'Sí' : 'No'}</span>
+              </div>
+
+              {/* Marcas Palace */}
+              {(eventData.details.marcaPalaceIzq || eventData.details.marcaPalaceDer) && (
+                <div className="pt-2 border-t border-emerald-500/20">
+                  <h4 className="text-lg font-semibold text-foreground mb-3">Marcas Palace</h4>
+                  {eventData.details.marcaPalaceIzq && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-muted-foreground font-medium">Aleta Izquierda:</span>
+                      <span className="font-semibold text-foreground">{eventData.details.marcaPalaceIzq}</span>
+                    </div>
+                  )}
+                  {eventData.details.marcaPalaceDer && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-muted-foreground font-medium">Aleta Derecha:</span>
+                      <span className="font-semibold text-foreground">{eventData.details.marcaPalaceDer}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Recaptura */}
+              {eventData.details.recapturaPalace && (
+                <div className="pt-2 border-t border-emerald-500/20">
+                  <h4 className="text-lg font-semibold text-foreground mb-3">Recaptura</h4>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-muted-foreground font-medium">Número de Serie:</span>
+                    <span className="font-semibold text-foreground">{eventData.details.numeroSerieRecaptura}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Marcas Externas */}
+              {(eventData.details.marcaExternaIzq || eventData.details.marcaExternaDer) && (
+                <div className="pt-2 border-t border-emerald-500/20">
+                  <h4 className="text-lg font-semibold text-foreground mb-3">Marcas Externas</h4>
+                  {eventData.details.marcaExternaIzq && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-muted-foreground font-medium">Aleta Izquierda:</span>
+                      <span className="font-semibold text-foreground">{eventData.details.marcaExternaIzq}</span>
+                    </div>
+                  )}
+                  {eventData.details.marcaExternaDer && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-muted-foreground font-medium">Aleta Derecha:</span>
+                      <span className="font-semibold text-foreground">{eventData.details.marcaExternaDer}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Detalles de Anidación */}
+        {eventData.type === "anidacion" && (
+          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 mb-6 border border-purple-500/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-foreground">Detalles de Anidación</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {eventData.details?.tamanoNidada && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Tamaño de Nidada:</span>
+                  <span className="font-semibold text-foreground text-2xl">{eventData.details.tamanoNidada} huevos</span>
+                </div>
+              )}
+
+              {eventData.details?.horaRecolecta && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Hora de Recolección:</span>
+                  <span className="font-semibold text-foreground">{formatTime(eventData.details.horaRecolecta)}</span>
+                </div>
+              )}
+
+              {eventData.details?.procedenciaHuevos && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Procedencia de Huevos:</span>
+                  <span className="font-semibold text-foreground">{getProcedenciaName(eventData.details.procedenciaHuevos)}</span>
+                </div>
+              )}
+
+              {/* Información de Traslado */}
+              {eventData.details?.procedenciaHuevos === 'traslado' && (
+                <div className="pt-2 border-t border-purple-500/20">
+                  <h4 className="text-lg font-semibold text-foreground mb-3">Información de Traslado</h4>
+                  
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-muted-foreground font-medium">Nido en peligro:</span>
+                    <span className="font-semibold text-foreground">{eventData.details.nidoEnPeligro ? 'Sí' : 'No'}</span>
+                  </div>
+
+                  {eventData.details.motivoTraslado && (
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-muted-foreground font-medium">Motivo de traslado:</span>
+                      <span className="font-semibold text-foreground">{getMotivoTrasladoName(eventData.details.motivoTraslado)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Observaciones */}
         {eventData.observations && (
-          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 mb-6 border border-purple-500/20">
+          <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-2xl p-6 mb-6 border border-amber-500/20">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
               </div>
