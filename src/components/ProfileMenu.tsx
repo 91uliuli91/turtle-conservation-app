@@ -213,8 +213,8 @@ export default function MobileProfileMenu() {
                       setShowMenu(false);
                     }}
                     className="w-full bg-[#252542] text-[#f8fafc] font-semibold py-2 
-                             border border-[#334155] rounded-xl transition-all duration-300 
-                             hover:scale-105 hover:bg-[#2d2d5a] text-sm"
+                            border border-[#334155] rounded-xl transition-all duration-300 
+                            hover:scale-105 hover:bg-[#2d2d5a] text-sm"
                   >
                     Crear Cuenta
                   </button>
@@ -228,9 +228,12 @@ export default function MobileProfileMenu() {
       {/* Modal de Autenticación Móvil */}
       {showAuthModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end justify-center z-50 animate-fadeIn">
-          <div className="bg-[#1a1a2e] rounded-t-3xl shadow-xl border border-[#334155] w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#1a1a2e] shadow-xl border border-[#334155]
+                          w-full max-w-lg max-h-[96vh]
+                          rounded-t-3xl rounded-b-none overflow-hidden">
+
             {/* Header del Modal */}
-            <div className="p-6 border-b border-[#334155] sticky top-0 bg-[#1a1a2e]">
+            <div className="p-6 sticky top-0 bg-[#1a1a2e]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-xl gradient-purple-blue flex items-center justify-center">
@@ -247,8 +250,7 @@ export default function MobileProfileMenu() {
                 </div>
                 <button
                   onClick={() => setShowAuthModal(false)}
-                  className="w-8 h-8 rounded-lg bg-[#252542] hover:bg-[#2d2d5a] 
-                           flex items-center justify-center transition-all duration-200"
+                  className="w-8 h-8 rounded-lg bg-[#252542] hover:bg-[#2d2d5a] flex items-center justify-center transition-all duration-200"
                 >
                   <svg className="w-4 h-4 text-[#94a3b8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -257,15 +259,14 @@ export default function MobileProfileMenu() {
               </div>
             </div>
 
-            {/* Contenido del Modal */}
-            <div className="p-6">
+            {/* Contenido scrollable */}
+            <div className="p-6 overflow-y-auto max-h-[calc(96vh-88px)]">
               {isLogin ? (
                 <MobileLoginForm onLogin={handleLogin} />
               ) : (
                 <MobileRegisterForm onRegister={handleRegister} />
               )}
 
-              {/* Cambiar entre Login/Registro */}
               <div className="text-center mt-6 pt-6 border-t border-[#334155]">
                 <p className="text-[#94a3b8] text-sm">
                   {isLogin ? '¿No tienes cuenta?' : '¿Ya tienes cuenta?'}{' '}
@@ -281,6 +282,7 @@ export default function MobileProfileMenu() {
           </div>
         </div>
       )}
+
     </>
   );
 }
