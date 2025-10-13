@@ -11,7 +11,14 @@ export default function EnvironmentalDataPanel({
   compact = false, 
   showLocationInfo = true 
 }: EnvironmentalDataPanelProps) {
-  const { data: environmentalData, loading, error, deviceLocation, refetch } = useEnvironmentalData();
+  const { 
+    data: environmentalData, 
+    loading, 
+    error, 
+    deviceLocation, 
+    usingCache, 
+    refetch 
+  } = useEnvironmentalData();
 
   if (loading) {
     return (
@@ -57,7 +64,14 @@ export default function EnvironmentalDataPanel({
     return (
       <div className="bg-card rounded-2xl p-4 border border-border/50 mb-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">Condiciones Actuales</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-foreground">Condiciones Actuales</span>
+            {usingCache && (
+              <span className="text-xs bg-yellow-500/20 text-yellow-600 px-1.5 py-0.5 rounded-full animate-pulse">
+                ⚡
+              </span>
+            )}
+          </div>
           {showLocationInfo && deviceLocation && (
             <span className="text-xs text-muted-foreground flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,6 +120,11 @@ export default function EnvironmentalDataPanel({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
             </svg>
             Condiciones en Tu Ubicación
+            {usingCache && (
+              <span className="text-xs bg-yellow-500/20 text-yellow-600 px-2 py-1 rounded-full animate-pulse">
+                ⚡ En cache
+              </span>
+            )}
           </h3>
           {showLocationInfo && deviceLocation && (
             <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
@@ -117,15 +136,29 @@ export default function EnvironmentalDataPanel({
             </p>
           )}
         </div>
-        <button 
-          onClick={refetch}
-          className="text-xs bg-secondary px-3 py-1 rounded-lg hover:bg-accent transition-colors flex items-center gap-1"
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Actualizar
-        </button>
+        <div className="flex items-center gap-2">
+          {usingCache && (
+            <button 
+              onClick={refetch}
+              className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-lg hover:bg-primary/30 transition-colors flex items-center gap-1"
+              title="Actualizar datos ahora"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Actualizar
+            </button>
+          )}
+          <button 
+            onClick={refetch}
+            className="text-xs bg-secondary px-3 py-1 rounded-lg hover:bg-accent transition-colors flex items-center gap-1"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Actualizar
+          </button>
+        </div>
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
