@@ -1,4 +1,4 @@
-// src/components/SummaryStep.tsx - VERSIÓN CORREGIDA
+// src/components/SummaryStep.tsx 
 "use client"
 
 import '../app/globals.css';
@@ -9,10 +9,19 @@ interface SummaryStepProps {
   eventData: any
   onBack: () => void
   onSave: () => void
+  onCancel: () => void // Nueva prop para cancelar completamente
   isSaving: boolean
+  saveError?: string | null // Nueva prop para manejar errores
 }
 
-export default function SummaryStep({ eventData, onBack, onSave, isSaving }: SummaryStepProps) {
+export default function SummaryStep({ 
+  eventData, 
+  onBack, 
+  onSave, 
+  onCancel,
+  isSaving, 
+  saveError 
+}: SummaryStepProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = React.useState<number | null>(null);
 
   const openPhotoModal = (index: number) => {
@@ -50,9 +59,30 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
     <div className="flex flex-col h-full animate-fadeInUp">
       <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50">
         <div className="mb-8 text-center">
-          <h2 className="text-3xl font-light text-foreground mb-2">Resumen del Evento</h2>
-          <p className="text-muted-foreground text-lg">Revisa la información antes de guardar</p>
+          <h2 className="text-3xl font-light text-foreground mb-2">
+            {saveError ? "Error al Guardar" : "Resumen del Evento"}
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            {saveError ? "No se pudo guardar el evento" : "Revisa la información antes de guardar"}
+          </p>
         </div>
+
+        {/* Banner de Error */}
+        {saveError && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-destructive">Error al guardar</h3>
+                <p className="text-destructive/80 text-sm">{saveError}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Datos Ambientales ACTUALIZADOS en tiempo real */}
         {eventData.location && eventData.location.lat !== 0 && (
@@ -177,7 +207,6 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
             {/* Grid de previsualizaciones */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {eventData.photos.map((photo: File, index: number) => {
-                // Crear URL temporal para la previsualización
                 const photoUrl = URL.createObjectURL(photo);
                 
                 return (
@@ -191,12 +220,10 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
                       alt={`Foto ${index + 1}`} 
                       className="w-full h-full object-cover"
                       onLoad={() => {
-                        // Liberar URL después de cargar la imagen
                         URL.revokeObjectURL(photoUrl);
                       }}
                     />
                     
-                    {/* Overlay con información */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute bottom-0 left-0 right-0 p-3">
                         <p className="text-white text-xs font-semibold truncate mb-1">
@@ -214,12 +241,10 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
                       </div>
                     </div>
 
-                    {/* Indicador de número de foto */}
                     <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
                       {index + 1}
                     </div>
 
-                    {/* Icono de zoom al hover */}
                     <div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full">
                         <svg className="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,7 +257,6 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
               })}
             </div>
 
-            {/* Información adicional */}
             <div className="mt-4 pt-4 border-t border-amber-500/20">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground flex items-center gap-2">
@@ -254,38 +278,78 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
 
         {/* Botones de acción */}
         <div className="flex gap-4 mt-8">
-          <button
-            onClick={onBack}
-            className="flex-1 px-6 py-4 bg-muted/50 border border-border rounded-2xl text-foreground hover:bg-muted hover:scale-105 transition-all duration-300 font-medium flex items-center justify-center space-x-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isSaving}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            <span>Volver</span>
-          </button>
-          
-          <button
-            onClick={onSave}
-            className="flex-1 px-6 py-4 gradient-purple-blue text-white rounded-2xl font-semibold hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <>
-                <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Guardando...</span>
-              </>
-            ) : (
-              <>
+          {saveError ? (
+            // BOTONES CUANDO HAY ERROR
+            <>
+              <button
+                onClick={onCancel}
+                className="flex-1 px-6 py-4 bg-muted/50 border border-border rounded-2xl text-foreground hover:bg-muted hover:scale-105 transition-all duration-300 font-medium flex items-center justify-center space-x-2 text-sm"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                <span>Guardar Evento</span>
-              </>
-            )}
-          </button>
+                <span>Cancelar</span>
+              </button>
+              
+              <button
+                onClick={onSave}
+                disabled={isSaving}
+                className="flex-1 px-6 py-4 bg-primary text-white rounded-2xl font-semibold hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+              >
+                {isSaving ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Reintentando...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Reintentar</span>
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            // BOTONES NORMALES (sin error)
+            <>
+              <button
+                onClick={onBack}
+                className="flex-1 px-6 py-4 bg-muted/50 border border-border rounded-2xl text-foreground hover:bg-muted hover:scale-105 transition-all duration-300 font-medium flex items-center justify-center space-x-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSaving}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>Volver</span>
+              </button>
+              
+              <button
+                onClick={onSave}
+                className="flex-1 px-6 py-4 gradient-purple-blue text-white rounded-2xl font-semibold hover:scale-105 hover:shadow-2xl hover:shadow-primary/25 transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Guardando...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Guardar Evento</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -295,7 +359,6 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
           className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={closePhotoModal}
         >
-          {/* Botón cerrar */}
           <button
             onClick={closePhotoModal}
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors z-10"
@@ -305,12 +368,10 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
             </svg>
           </button>
 
-          {/* Contador */}
           <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium z-10">
             {selectedPhotoIndex + 1} / {eventData.photos.length}
           </div>
 
-          {/* Botón anterior */}
           {eventData.photos.length > 1 && (
             <button
               onClick={(e) => {
@@ -325,7 +386,6 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
             </button>
           )}
 
-          {/* Imagen */}
           <div className="max-w-4xl max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
             <img
               src={URL.createObjectURL(eventData.photos[selectedPhotoIndex])}
@@ -337,7 +397,6 @@ export default function SummaryStep({ eventData, onBack, onSave, isSaving }: Sum
             </p>
           </div>
 
-          {/* Botón siguiente */}
           {eventData.photos.length > 1 && (
             <button
               onClick={(e) => {

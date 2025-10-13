@@ -202,10 +202,40 @@ export default function WizardForm() {
     }
   };
 
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const handleCancel = () => {
+    setEventData({
+      type: "",
+      location: { lat: 0, lon: 0 },
+      details: {} as EventDetailsType,
+      photos: [] as File[],
+      observations: "",
+      environmentalData: null,
+    });
+    setCurrentStep(1);
+    setSaveStatus("idle");
+    setSaveError(null);
+    setShowSuccessOptions(false);
+  };
+
+  // Función handleBack modificada para manejar el paso 5
+  const handleBack = () => {
+    if (currentStep === 5 && saveError) {
+      // Si hay error en el paso 5, regresar al paso anterior
+      setSaveError(null);
+      setCurrentStep(4);
+    } else {
+      // Comportamiento normal
+      prevStep();
+    }
+  };
+
   // Función handleSave COMPLETAMENTE ACTUALIZADA para soporte offline
   const handleSave = async () => {
     setIsSaving(true);
     setSaveStatus("saving");
+    setSaveError(null); // Limpiar error anterior
 
     try {
       if (!networkStatus.isConnected) {
@@ -219,9 +249,10 @@ export default function WizardForm() {
         console.log('🔄 Online save failed, falling back to offline save');
         return await handleOfflineSave();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error saving event:', error);
       setSaveStatus("error");
+      setSaveError(error.message || "Error desconocido al guardar el evento");
     } finally {
       setIsSaving(false);
     }
@@ -266,9 +297,9 @@ export default function WizardForm() {
       } else {
         throw new Error('Failed to save offline');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Offline save failed:', error);
-      setSaveStatus("error");
+      setSaveError(error.message || "Error al guardar en modo offline");
       throw error;
     }
   };
@@ -761,11 +792,13 @@ export default function WizardForm() {
         )
       case 5:
         return (
-          <SummaryStep 
-            eventData={eventData} 
-            onBack={prevStep} 
-            onSave={handleSave} 
-            isSaving={isSaving} 
+          <SummaryStep
+            eventData={eventData}
+            onBack={handleBack}
+            onSave={handleSave}
+            onCancel={handleCancel}
+            isSaving={isSaving}
+            saveError={saveError}
           />
         )
       default:
