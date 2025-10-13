@@ -191,7 +191,7 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
   );
 
   return (
-    <div className="flex flex-col px-6 py-8 animate-fadeIn">
+    <div className="flex flex-col px-6 py-8 animate-fadeIn bg-card rounded-3xl p-8 shadow-xl border border-border/50 max-w-4xl mx-auto">
       <div className="mb-8 text-center">
         <h2 className="text-2xl font-light text-gray-100 mb-2">
           Detalles del Evento
@@ -216,17 +216,17 @@ export default function EventDetails({ eventType, onDetailsChange, onBack, onNex
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="flex-1 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl 
-                    text-gray-300 font-medium transition-all duration-200"
+          className="flex-1 px-6 py-4 bg-muted/50 border border-border rounded-2xl text-foreground hover:bg-muted hover:scale-105 transition-all duration-300 font-medium flex items-center justify-center space-x-2 text-sm"
         >
           ← Volver
         </button>
         <button
           onClick={onNext}
-          className="flex-1 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 
-                    hover:from-emerald-500 hover:to-teal-500 rounded-xl 
-                    text-white font-medium transition-all duration-200 shadow-lg"
-        >
+                    className="flex-1 py-4 gradient-purple-blue text-white font-semibold 
+                    rounded-2xl transition-all duration-300 hover:scale-105 
+                    hover:shadow-2xl hover:shadow-primary/25
+                    flex items-center justify-center gap-2"
+          >
           Siguiente →
         </button>
       </div>

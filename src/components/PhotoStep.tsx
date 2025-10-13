@@ -319,108 +319,141 @@ export default function PhotoStep({
           <p className="text-muted-foreground text-lg">Documenta el evento con imágenes</p>
         </div>
 
-        {/* Modal de Cámara */}
-        {isCameraOpen && (
-          <div className="fixed inset-0 z-50 bg-black flex flex-col">
-            {/* Header de la cámara */}
-            <div className="flex justify-between items-center p-4 bg-black/80 backdrop-blur-sm">
-              <div className="text-white font-semibold flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${stream ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
-                Cámara {stream ? 'Activa' : 'Iniciando...'}
+      {/* Modal de Cámara */}
+      {isCameraOpen && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col">
+          {/* Header de la cámara */}
+          <div className="flex justify-between items-center p-4 bg-black/80 backdrop-blur-sm">
+            <div className="text-white font-semibold flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${stream ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+              Cámara {stream ? 'Activa' : 'Iniciando...'}
+            </div>
+            <button
+              onClick={closeCamera}
+              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Vista de la cámara */}
+          <div className="flex-1 relative overflow-hidden bg-black">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+              style={{ transform: 'scaleX(1)' }}
+            />
+            
+            {/* Canvas oculto para captura */}
+            <canvas
+              ref={canvasRef}
+              className="hidden"
+            />
+
+            {/* Overlay de guía */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              {stream && (
+                <div className="w-full h-full border-2 border-white/30 m-auto" 
+                    style={{ maxWidth: '90%', maxHeight: '90%' }} />
+              )}
+            </div>
+
+            {/* Estado de la cámara */}
+            {stream && (
+              <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
+                {photos.length} {photos.length === 1 ? 'foto' : 'fotos'}
               </div>
+            )}
+
+            {/* Miniatura de última foto capturada */}
+            {photos.length > 0 && (
+              <div className="absolute top-4 left-4 w-16 h-16 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg">
+                <img 
+                  src={photos[photos.length - 1].url} 
+                  alt="Última foto"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Controles de la cámara */}
+          <div className="p-8 bg-black/80 backdrop-blur-sm">
+            <div className="flex justify-center items-center gap-8">
+              {/* Contador de fotos */}
+              <div className="text-white text-sm font-medium">
+                {photos.length} capturadas
+              </div>
+
+              {/* Botón de captura */}
               <button
-                onClick={closeCamera}
-                className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                onClick={capturePhotoSimple}
+                disabled={isCapturing || !stream}
+                className={`w-20 h-20 rounded-full border-4 border-white 
+                          flex items-center justify-center transition-all duration-200
+                          ${isCapturing || !stream 
+                            ? 'bg-gray-500 opacity-50 cursor-not-allowed' 
+                            : 'bg-white/20 hover:bg-white/30 active:scale-95'
+                          }`}
+              >
+                {isCapturing ? (
+                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-white" />
+                )}
+              </button>
+
+              {/* Botón de galería */}
+              <button
+                onClick={() => {
+                  closeCamera()
+                  setTimeout(() => fileInputRef.current?.click(), 300)
+                }}
+                className="w-12 h-12 rounded-lg bg-white/20 hover:bg-white/30 
+                        flex items-center justify-center transition-colors"
               >
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </button>
             </div>
 
-            {/* Vista de la cámara */}
-            <div className="flex-1 relative overflow-hidden bg-black">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-                style={{ transform: 'scaleX(1)' }}
-              />
-              
-              {/* Canvas oculto para captura */}
-              <canvas
-                ref={canvasRef}
-                className="hidden"
-              />
-
-              {/* Overlay de guía */}
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                {stream && (
-                  <div className="w-full h-full border-2 border-white/30 m-auto" 
-                       style={{ maxWidth: '90%', maxHeight: '90%' }} />
-                )}
+            {/* Mensaje de captura */}
+            {isCapturing && (
+              <div className="text-center text-white mt-4 text-sm">
+                Capturando foto...
               </div>
+            )}
 
-              {/* Estado de la cámara */}
-              {stream && (
-                <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
-                  {photos.length} {photos.length === 1 ? 'foto' : 'fotos'}
-                </div>
-              )}
-            </div>
-
-            {/* Controles de la cámara */}
-            <div className="p-8 bg-black/80 backdrop-blur-sm">
-              <div className="flex justify-center items-center gap-8">
-                {/* Contador de fotos */}
-                <div className="text-white text-sm font-medium">
-                  {photos.length} capturadas
-                </div>
-
-                {/* Botón de captura - USAR LA VERSIÓN SIMPLE */}
-                <button
-                  onClick={capturePhotoSimple}
-                  disabled={isCapturing || !stream}
-                  className={`w-20 h-20 rounded-full border-4 border-white 
-                            flex items-center justify-center transition-all duration-200
-                            ${isCapturing || !stream 
-                              ? 'bg-gray-500 opacity-50 cursor-not-allowed' 
-                              : 'bg-white/20 hover:bg-white/30 active:scale-95'
-                            }`}
-                >
-                  {isCapturing ? (
-                    <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-white" />
-                  )}
-                </button>
-
-                {/* Botón de galería */}
-                <button
-                  onClick={() => {
-                    closeCamera()
-                    setTimeout(() => fileInputRef.current?.click(), 300)
-                  }}
-                  className="w-12 h-12 rounded-lg bg-white/20 hover:bg-white/30 
-                           flex items-center justify-center transition-colors"
-                >
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </button>
+            {/* Indicador de éxito después de capturar */}
+            {photos.length > 0 && !isCapturing && (
+              <div className="text-center text-green-400 mt-4 text-sm flex items-center justify-center gap-2 animate-fadeIn">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Foto guardada correctamente</span>
               </div>
+            )}
 
-              {isCapturing && (
-                <div className="text-center text-white mt-4 text-sm">
-                  Capturando foto...
-                </div>
-              )}
-            </div>
+            {/* Botón de cerrar cámara */}
+            <button
+              onClick={closeCamera}
+              className="w-full mt-4 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 border border-white/20"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Confirmar y Cerrar ({photos.length} fotos)</span>
+            </button>
           </div>
-        )}
+        </div>
+      )}
 
         {/* Sección de fotos */}
         <div className="mb-8">
