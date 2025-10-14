@@ -19,20 +19,20 @@ export async function POST(request: Request) {
     
     const user = result.rows[0];
     
-    // Verificar contraseña
+    // Verificar contraseÃ±a
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return NextResponse.json({ error: 'Credenciales incorrectas' }, { status: 401 });
     }
     
-    // Crear sesión
+    // Crear sesiÃ³n
     const response = NextResponse.json({ 
       success: true, 
       user: { 
         id: user.id, 
-        nombre: user.nombre_completo,  // ← nombre_completo
+        nombre: user.nombre_completo,  // â† nombre_completo
         email: user.email, 
-        cargo: user.rol  // ← rol como cargo
+        cargo: user.rol  // â† rol como cargo
       }
     });
     
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 // 1 día
+      maxAge: 60 * 60 * 24 // 1 dÃ­a
     });
     
     return response;

@@ -17,10 +17,10 @@ export async function POST(request: Request) {
     );
     
     if (existingUser.rows.length > 0) {
-      return NextResponse.json({ error: 'El email ya está registrado' }, { status: 400 });
+      return NextResponse.json({ error: 'El email ya estÃ¡ registrado' }, { status: 400 });
     }
     
-    // Hash de la contraseña
+    // Hash de la contraseÃ±a
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
     
@@ -38,9 +38,9 @@ export async function POST(request: Request) {
       success: true, 
       user: { 
         id: user.id, 
-        nombre: user.nombre_completo,  // ← nombre_completo
+        nombre: user.nombre_completo,  // â† nombre_completo
         email: user.email, 
-        cargo: user.rol  // ← rol como cargo
+        cargo: user.rol  // â† rol como cargo
       } 
     });
     
