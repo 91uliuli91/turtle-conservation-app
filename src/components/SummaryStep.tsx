@@ -1,8 +1,6 @@
-// src/components/SummaryStep.tsx - VERSIÓN CORREGIDA PARA INTENTO
+// src/components/SummaryStep.tsx - VERSIÓN ACTUALIZADA CON TODOS LOS NUEVOS CAMPOS
 "use client"
 
-import '../app/globals.css';
-import EnvironmentalDataPanel from './EnvironmentalDataPanel';
 import React from 'react';
 
 interface SummaryStepProps {
@@ -24,13 +22,8 @@ export default function SummaryStep({
 }: SummaryStepProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = React.useState<number | null>(null);
 
-  const openPhotoModal = (index: number) => {
-    setSelectedPhotoIndex(index);
-  };
-
-  const closePhotoModal = () => {
-    setSelectedPhotoIndex(null);
-  };
+  const openPhotoModal = (index: number) => setSelectedPhotoIndex(index);
+  const closePhotoModal = () => setSelectedPhotoIndex(null);
 
   const nextPhoto = () => {
     if (selectedPhotoIndex !== null && eventData.photos) {
@@ -66,51 +59,45 @@ export default function SummaryStep({
 
   const getZonaName = (zona: string) => {
     const names: { [key: string]: string } = {
-      A: "Zona A",
-      B: "Zona B", 
-      C: "Zona C",
+      Norte: "Zona Norte",
+      Centro: "Zona Centro", 
+      Sur: "Zona Sur",
     }
     return names[zona] || zona
   }
 
-  const getProcedenciaName = (procedencia: string) => {
+  const getClaveNidoName = (clave: string) => {
     const names: { [key: string]: string } = {
-      nido_original: "Nido original en playa",
-      traslado: "Traslado por peligro",
-      rescate: "Rescate de nido erosionado",
+      camastros: "Camastros",
+      vegetacion: "Vegetación",
+      otro: "Otro",
     }
-    return names[procedencia] || procedencia
+    return names[clave] || clave
   }
 
-  const getMotivoTrasladoName = (motivo: string) => {
+  const getMedioTransporteName = (medio: string) => {
     const names: { [key: string]: string } = {
-      inundacion: "Riesgo de inundación",
-      depredacion: "Amenaza de depredación",
-      erosion: "Erosión de playa",
-      otro: "Otro motivo",
+      a_pie: "A pie",
+      cuatrimoto: "Cuatrimoto",
+      vehiculo: "Vehículo",
+      otro: "Otro",
     }
-    return names[motivo] || motivo
+    return names[medio] || medio
   }
 
-  const getCampamentoName = (id: number) => {
+  const getContenedorName = (contenedor: string) => {
     const names: { [key: string]: string } = {
-      1: "Campamento Norte",
-      2: "Campamento Sur",
-      3: "Campamento Este",
-      4: "Campamento Oeste",
+      bolsa: "Bolsa",
+      cubeta: "Cubeta",
+      caja: "Caja",
+      otro: "Otro",
     }
-    return names[id] || `Campamento ${id}`
+    return names[contenedor] || contenedor
   }
 
-  const formatTime = (timeString: string) => {
-    if (!timeString) return 'No registrada';
-    return timeString;
-  }
-
-  // Función para determinar si hay tortuga (lógica corregida para intento)
   const hayTortuga = () => {
     if (eventData.type === 'intento') {
-      return false; // Intento siempre es sin tortuga
+      return false;
     }
     return eventData.details?.hayTortuga || false;
   }
@@ -144,13 +131,58 @@ export default function SummaryStep({
           </div>
         )}
 
-        {/* Datos Ambientales ACTUALIZADOS en tiempo real */}
-        {eventData.location && eventData.location.lat !== 0 && (
-          <div className="mb-6">
-            <EnvironmentalDataPanel 
-              compact={true}
-              showLocationInfo={false}
-            />
+        {/* 🆕 DATOS AMBIENTALES CON INDICADOR DE GUARDADO */}
+        {eventData.environmentalData && (
+          <div className="mb-6 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-2xl p-6 border border-cyan-500/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Datos Ambientales</h3>
+                <p className="text-sm text-muted-foreground flex items-center gap-2">
+                  <svg className="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Información registrada automáticamente
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-3 bg-card/50 rounded-xl">
+                <div className="text-sm text-muted-foreground mb-1">🌡️ Temperatura</div>
+                <div className="text-lg font-bold text-foreground">
+                  {eventData.environmentalData.weather?.temperature}°C
+                </div>
+              </div>
+              <div className="text-center p-3 bg-card/50 rounded-xl">
+                <div className="text-sm text-muted-foreground mb-1">💧 Humedad</div>
+                <div className="text-lg font-bold text-foreground">
+                  {eventData.environmentalData.weather?.humidity}%
+                </div>
+              </div>
+              <div className="text-center p-3 bg-card/50 rounded-xl">
+                <div className="text-sm text-muted-foreground mb-1">🌊 Marea</div>
+                <div className="text-lg font-bold text-foreground">
+                  {eventData.environmentalData.tide?.tideHeight}m
+                </div>
+              </div>
+              <div className="text-center p-3 bg-card/50 rounded-xl">
+                <div className="text-sm text-muted-foreground mb-1">🌙 Luna</div>
+                <div className="text-lg font-bold text-foreground">
+                  {eventData.environmentalData.moonPhase?.illumination}%
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-3 pt-3 border-t border-cyan-500/20">
+              <p className="text-xs text-muted-foreground text-center">
+                📍 Ubicación: {eventData.location.lat.toFixed(6)}, {eventData.location.lon.toFixed(6)}
+              </p>
+            </div>
           </div>
         )}
 
@@ -187,19 +219,16 @@ export default function SummaryStep({
           </div>
         </div>
 
-        {/* Información de Ubicación y Especie */}
+        {/* 🆕 ZONA Y ESTACIÓN (ACTUALIZADO) */}
         {eventData.details && (
           <div className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-2xl p-6 mb-6 border border-blue-500/20">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-foreground">
-                {eventData.type === 'intento' ? 'Ubicación del Intento' : 'Ubicación y Especie'}
-              </h3>
+              <h3 className="text-xl font-semibold text-foreground">Ubicación del Evento</h3>
             </div>
             
             <div className="space-y-4">
@@ -210,21 +239,13 @@ export default function SummaryStep({
                 </div>
               )}
 
-              {eventData.details.campamento_id && (
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-muted-foreground font-medium">Campamento:</span>
-                  <span className="font-semibold text-foreground">{getCampamentoName(eventData.details.campamento_id)}</span>
-                </div>
-              )}
-
               {eventData.details.estacion_baliza && (
                 <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-muted-foreground font-medium">Estación/Baliza:</span>
-                  <span className="font-semibold text-foreground">{eventData.details.estacion_baliza}</span>
+                  <span className="text-muted-foreground font-medium">Estación Baliza:</span>
+                  <span className="font-semibold text-foreground">#{eventData.details.estacion_baliza}</span>
                 </div>
               )}
 
-              {/* Para intento: Mensaje específico */}
               {eventData.type === 'intento' ? (
                 <div className="flex justify-between items-center py-2 border-b border-border/30">
                   <span className="text-muted-foreground font-medium">Tipo de registro:</span>
@@ -239,9 +260,7 @@ export default function SummaryStep({
 
               {eventData.details.especie && (
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-muted-foreground font-medium">
-                    {eventData.type === 'intento' ? 'Especie (del rastro):' : 'Especie:'}
-                  </span>
+                  <span className="text-muted-foreground font-medium">Especie:</span>
                   <span className="font-semibold text-foreground">{getEspecieName(eventData.details.especie)}</span>
                 </div>
               )}
@@ -249,7 +268,7 @@ export default function SummaryStep({
           </div>
         )}
 
-        {/* Información de la Tortuga (solo si HAY tortuga y NO es intento) */}
+        {/* 🆕 INFORMACIÓN DE LA TORTUGA (CON CICATRIZ) */}
         {hayTortuga() && eventData.type !== 'intento' && (
           <div className="bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-2xl p-6 mb-6 border border-emerald-500/20">
             <div className="flex items-center gap-3 mb-4">
@@ -272,40 +291,72 @@ export default function SummaryStep({
                 <span className="font-semibold text-foreground">{eventData.details.acc} cm</span>
               </div>
 
-              {eventData.details.seObservo !== undefined && (
+              {/* 🆕 CICATRIZ */}
+              {eventData.details.tieneCicatriz !== undefined && (
                 <div className="flex justify-between items-center py-2 border-b border-border/30">
-                  <span className="text-muted-foreground font-medium">Se observó anidación:</span>
-                  <span className="font-semibold text-foreground">{eventData.details.seObservo ? 'Sí' : 'No'}</span>
+                  <span className="text-muted-foreground font-medium">Tiene cicatriz:</span>
+                  <span className="font-semibold text-foreground flex items-center gap-2">
+                    {eventData.details.tieneCicatriz ? (
+                      <>
+                        <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Sí (indica marca previa)
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        No
+                      </>
+                    )}
+                  </span>
                 </div>
               )}
 
-              {/* Marcas Palace */}
-              {(eventData.details.marcaPalaceIzq || eventData.details.marcaPalaceDer) && (
+              {/* 🆕 TIPO DE MARCAJE */}
+              {eventData.details.tipoMarcaje && (
                 <div className="pt-2 border-t border-emerald-500/20">
-                  <h4 className="text-lg font-semibold text-foreground mb-3">Marcas Palace</h4>
-                  {eventData.details.marcaPalaceIzq && (
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-muted-foreground font-medium">Aleta Izquierda:</span>
-                      <span className="font-semibold text-foreground">{eventData.details.marcaPalaceIzq}</span>
+                  <h4 className="text-lg font-semibold text-foreground mb-3">
+                    {eventData.details.tipoMarcaje === 'marcaje' ? '🏷️ Marcaje Palace (Nuevo)' : '🔄 Recaptura'}
+                  </h4>
+                  
+                  {eventData.details.tipoMarcaje === 'marcaje' ? (
+                    /* Marcaje Palace */
+                    <div className="space-y-2">
+                      {eventData.details.marcaPalaceIzq && (
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-muted-foreground font-medium">Aleta Izquierda:</span>
+                          <span className="font-semibold text-foreground">{eventData.details.marcaPalaceIzq}</span>
+                        </div>
+                      )}
+                      {eventData.details.marcaPalaceDer && (
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-muted-foreground font-medium">Aleta Derecha:</span>
+                          <span className="font-semibold text-foreground">{eventData.details.marcaPalaceDer}</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Recaptura */
+                    <div className="space-y-2">
+                      {eventData.details.ladoRecaptura && (
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-muted-foreground font-medium">Lado de la marca:</span>
+                          <span className="font-semibold text-foreground capitalize">
+                            Aleta {eventData.details.ladoRecaptura}
+                          </span>
+                        </div>
+                      )}
+                      {eventData.details.numeroSerieRecaptura && (
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-muted-foreground font-medium">Número de Serie:</span>
+                          <span className="font-semibold text-foreground">{eventData.details.numeroSerieRecaptura}</span>
+                        </div>
+                      )}
                     </div>
                   )}
-                  {eventData.details.marcaPalaceDer && (
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-muted-foreground font-medium">Aleta Derecha:</span>
-                      <span className="font-semibold text-foreground">{eventData.details.marcaPalaceDer}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Recaptura */}
-              {eventData.details.recapturaPalace && (
-                <div className="pt-2 border-t border-emerald-500/20">
-                  <h4 className="text-lg font-semibold text-foreground mb-3">Recaptura</h4>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-muted-foreground font-medium">Número de Serie:</span>
-                    <span className="font-semibold text-foreground">{eventData.details.numeroSerieRecaptura}</span>
-                  </div>
                 </div>
               )}
 
@@ -331,7 +382,7 @@ export default function SummaryStep({
           </div>
         )}
 
-        {/* Detalles de Anidación (solo para anidación) */}
+        {/* 🆕 DETALLES DE ANIDACIÓN (CON CLAVE DE NIDO) */}
         {eventData.type === "anidacion" && (
           <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 mb-6 border border-purple-500/20">
             <div className="flex items-center gap-3 mb-4">
@@ -351,38 +402,50 @@ export default function SummaryStep({
                 </div>
               )}
 
+              {/* 🆕 CLAVE DE NIDO */}
+              {eventData.details?.claveNido && (
+                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                  <span className="text-muted-foreground font-medium">Clave de Nido:</span>
+                  <span className="font-semibold text-foreground">
+                    {getClaveNidoName(eventData.details.claveNido)}
+                    {eventData.details.claveNido === 'otro' && eventData.details.claveNidoOtro && 
+                      ` (${eventData.details.claveNidoOtro})`}
+                  </span>
+                </div>
+              )}
+
               {eventData.details?.horaRecolecta && (
                 <div className="flex justify-between items-center py-2 border-b border-border/30">
                   <span className="text-muted-foreground font-medium">Hora de Recolección:</span>
-                  <span className="font-semibold text-foreground">{formatTime(eventData.details.horaRecolecta)}</span>
+                  <span className="font-semibold text-foreground">{eventData.details.horaRecolecta}</span>
                 </div>
               )}
 
               {eventData.details?.procedenciaHuevos && (
-                <div className="flex justify-between items-center py-2 border-b border-border/30">
+                <div className="flex justify-between items-center py-2">
                   <span className="text-muted-foreground font-medium">Procedencia de Huevos:</span>
-                  <span className="font-semibold text-foreground">{getProcedenciaName(eventData.details.procedenciaHuevos)}</span>
+                  <span className="font-semibold text-foreground capitalize">
+                    {eventData.details.procedenciaHuevos.replace('_', ' ')}
+                  </span>
                 </div>
               )}
+            </div>
+          </div>
+        )}
 
-              {/* Información de Traslado */}
-              {eventData.details?.procedenciaHuevos === 'traslado' && (
-                <div className="pt-2 border-t border-purple-500/20">
-                  <h4 className="text-lg font-semibold text-foreground mb-3">Información de Traslado</h4>
-                  
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-muted-foreground font-medium">Nido en peligro:</span>
-                    <span className="font-semibold text-foreground">{eventData.details.nidoEnPeligro ? 'Sí' : 'No'}</span>
-                  </div>
-
-                  {eventData.details.motivoTraslado && (
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-muted-foreground font-medium">Motivo de traslado:</span>
-                      <span className="font-semibold text-foreground">{getMotivoTrasladoName(eventData.details.motivoTraslado)}</span>
-                    </div>
-                  )}
-                </div>
-              )}
+        {/* 🆕 FOTÓGRAFO */}
+        {eventData.details?.fotografo && (
+          <div className="bg-amber-500/10 rounded-xl p-4 mb-6 border border-amber-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Fotógrafo</p>
+                <p className="font-semibold text-foreground">{eventData.details.fotografo}</p>
+              </div>
             </div>
           </div>
         )}
@@ -412,7 +475,6 @@ export default function SummaryStep({
               <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
                 <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-foreground">
@@ -420,7 +482,6 @@ export default function SummaryStep({
               </h3>
             </div>
             
-            {/* Grid de previsualizaciones */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {eventData.photos.map((photo: File, index: number) => {
                 const photoUrl = URL.createObjectURL(photo);
@@ -495,7 +556,6 @@ export default function SummaryStep({
         {/* Botones de acción */}
         <div className="flex gap-4 mt-8">
           {saveError ? (
-            // BOTONES CUANDO HAY ERROR
             <>
               <button
                 onClick={onCancel}
@@ -530,7 +590,6 @@ export default function SummaryStep({
               </button>
             </>
           ) : (
-            // BOTONES NORMALES (sin error)
             <>
               <button
                 onClick={onBack}
