@@ -2,7 +2,7 @@
 "use client"
 import { useState } from "react"
 import Link from "next/link"
-import { PlusCircleIcon, MapIcon, ChartBarIcon } from "@heroicons/react/24/outline"
+import { PlusCircleIcon, MapIcon, ChartBarIcon, ChevronDownIcon, ChevronUpIcon, } from "@heroicons/react/24/outline"
 import EnvironmentalDataPanel from "@/components/EnvironmentalDataPanel"
 import ProfileMenu from "@/components/ProfileMenu"
 
@@ -95,42 +95,6 @@ export default function TurtleTrackDashboard() {
         </main>
       </div>
 
-      {/* Menú Hamburguesa Flotante - Solo Siembra y Eclosión */}
-      {showMenu && (
-        <>
-          <div 
-            className="fixed inset-0 bg-black/20 z-40"
-            onClick={() => setShowMenu(false)}
-          />
-          
-          <div className="fixed bottom-20 right-4 bg-card border border-border rounded-2xl shadow-xl backdrop-blur-xl z-50 animate-fadeInUp">
-            <div className="p-2 space-y-1 min-w-[180px]">
-              <Link 
-                href="/siembra"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-accent rounded-xl transition-colors text-foreground"
-              >
-                <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="font-medium">Siembra</span>
-              </Link>
-              
-              <Link 
-                href="/eclosion"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-accent rounded-xl transition-colors text-foreground"
-              >
-                <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-medium">Eclosión</span>
-              </Link>
-            </div>
-          </div>
-        </>
-      )}
-
       {/* Navegación inferior */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 p-3 shadow-lg">
         <div className="flex justify-around items-center h-full max-w-lg mx-auto">
@@ -156,24 +120,24 @@ export default function TurtleTrackDashboard() {
           >
             <PlusCircleIcon className="w-8 h-8" />
           </Link>
-
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl relative"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <span className="text-xs mt-1 font-medium">Más</span>
-            {showMenu && (
-              <div className="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full animate-pulse" />
-            )}
-          </button>
-       <ProfileMenu />
-          {/* Placeholder para mantener la estructura de 5 elementos */}
-          <div className="w-14 opacity-0">
-            <div className="w-6 h-6"></div>
-          </div>
+            <Link 
+                href="/siembra"
+                onClick={() => setShowMenu(false)}
+                className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl"
+              >
+              <ChevronUpIcon className="w-6 h-6" />
+                <span className="text-xs mt-1 font-medium">Siembra</span>
+              </Link>
+              
+              <Link 
+                href="/eclosion"
+                onClick={() => setShowMenu(false)}
+                className="flex flex-col items-center text-muted-foreground hover:text-primary transition-colors duration-300 ease-in-out px-4 py-2 rounded-xl"
+              >
+                
+              <ChevronDownIcon className="w-6 h-6" />
+                <span className="text-xs mt-1 font-medium">Eclosión</span>
+              </Link>
         </div>
       </nav>
     </div>
