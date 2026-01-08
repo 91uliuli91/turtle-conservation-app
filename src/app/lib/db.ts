@@ -56,8 +56,4 @@ export const closeConnections = async () => {
 
 // Export default del pool para uso directo
 export default pool;
-<<<<<<< HEAD
 (tu versión local)
-=======
-(versión remota)
->>>>>>> (hash del commit remoto)

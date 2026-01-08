@@ -1,14 +1,15 @@
-// src/components/PhotoStep.tsx - VERSIÓN CORREGIDA (Múltiples fotos funcionando)
+// src/components/PhotoStep.tsx - OPTIMIZADO PARA ARQUEO SIN TORTUGA
 "use client"
 
 import { useState, useRef, useCallback, useEffect } from "react"
-import '../app/globals.css'
 
 interface PhotoStepProps {
   onPhotosChange: (photos: File[]) => void
   onObservationsChange: (observations: string) => void
   onBack: () => void
   onNext: () => void
+  eventType?: string // 🆕 Para saber el tipo de evento
+  hayTortuga?: boolean // 🆕 Para saber si hay tortuga
 }
 
 interface PhotoPreview {
@@ -16,14 +17,16 @@ interface PhotoPreview {
   file: File
   url: string
   timestamp: number
-  blob: Blob // ← AGREGAR ESTA LÍNEA PARA MANTENER LA REFERENCIA AL BLOB
+  blob: Blob
 }
 
 export default function PhotoStep({ 
   onPhotosChange, 
   onObservationsChange, 
   onBack, 
-  onNext 
+  onNext,
+  eventType = '',
+  hayTortuga = true
 }: PhotoStepProps) {
   const [photos, setPhotos] = useState<PhotoPreview[]>([])
   const [observations, setObservations] = useState("")
@@ -35,31 +38,37 @@ export default function PhotoStep({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Función para actualizar las fotos y notificar al componente padre
+  // 🚀 AUTO-SKIP: Si es arqueo sin tortuga, pasar automáticamente
+  useEffect(() => {
+    if (eventType === 'arqueo' && !hayTortuga) {
+      console.log('⏭️ Arqueo sin tortuga detectado - saltando paso de fotos');
+      // Pasar automáticamente después de un breve delay
+      const timer = setTimeout(() => {
+        onNext();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [eventType, hayTortuga, onNext]);
+
   const updatePhotos = useCallback((newPhotos: PhotoPreview[]) => {
     setPhotos(newPhotos);
     onPhotosChange(newPhotos.map(photo => photo.file));
   }, [onPhotosChange]);
 
-  // Abrir cámara del dispositivo
   const openCamera = useCallback(async () => {
     try {
-      // CORRECCIÓN: Limpiar stream anterior SI existe
       if (stream) {
         console.log('🔄 Limpiando stream anterior...');
         stream.getTracks().forEach(track => {
-          console.log(`⏹️ Deteniendo track: ${track.kind}`);
           track.stop();
         });
         setStream(null);
-        // Pequeña pausa para asegurar la limpieza
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       console.log('🎥 Intentando abrir cámara...');
       setIsCameraOpen(true);
       
-      // Verificar disponibilidad de la API
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Tu navegador no soporta acceso a la cámara');
       }
@@ -73,23 +82,14 @@ export default function PhotoStep({
         audio: false
       });
       
-      console.log('✅ Stream obtenido:', mediaStream);
-      
       setStream(mediaStream);
       
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        
         videoRef.current.onloadedmetadata = () => {
-          console.log('📺 Video metadata cargada');
           videoRef.current?.play().catch(err => {
             console.error('❌ Error playing video:', err);
           });
-        };
-
-        // Agregar manejo de errores del video
-        videoRef.current.onerror = (e) => {
-          console.error('❌ Error en elemento video:', e);
         };
       }
     } catch (error: any) {
@@ -99,100 +99,20 @@ export default function PhotoStep({
     }
   }, [stream]);
 
-  // Efecto para reiniciar la cámara cuando se abre
   useEffect(() => {
     if (isCameraOpen && !stream) {
-      // Si la cámara está abierta pero no hay stream, intentar abrirla
       openCamera();
     }
   }, [isCameraOpen, stream, openCamera]);
 
-  // Cerrar cámara
   const closeCamera = useCallback(() => {
     if (stream) {
-      console.log('🔴 Cerrando cámara...')
       stream.getTracks().forEach(track => track.stop())
       setStream(null)
     }
     setIsCameraOpen(false)
   }, [stream])
 
-  // SOLUCIÓN DEFINITIVA: Capturar foto manteniendo referencia al blob
-  const capturePhoto = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current || !stream) {
-      console.error('❌ No hay video, canvas o stream disponible')
-      return
-    }
-    
-    setIsCapturing(true)
-    
-    try {
-      const video = videoRef.current
-      const canvas = canvasRef.current
-      
-      // Verificar que el video esté listo
-      if (video.videoWidth === 0 || video.videoHeight === 0) {
-        console.error('❌ Video no está listo')
-        setIsCapturing(false)
-        return
-      }
-
-      // Configurar canvas
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        console.error('❌ No se pudo obtener el contexto 2D')
-        setIsCapturing(false)
-        return
-      }
-
-      // Dibujar frame actual
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-      
-      // SOLUCIÓN: Convertir canvas a data URL en lugar de blob
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
-      
-      // Convertir data URL a blob
-      const response = await fetch(dataUrl)
-      const blob = await response.blob()
-      
-      const timestamp = Date.now()
-      const fileName = `foto_${timestamp}.jpg`
-      
-      // Crear File desde el blob
-      const file = new File([blob], fileName, {
-        type: 'image/jpeg',
-        lastModified: timestamp
-      })
-      
-      // Crear URL desde el blob (no desde data URL)
-      const url = URL.createObjectURL(blob)
-      
-      const photoPreview: PhotoPreview = {
-        id: `photo_${timestamp}`,
-        file,
-        url,
-        timestamp,
-        blob // ← MANTENER REFERENCIA AL BLOB
-      }
-      
-      // Actualizar fotos
-      const updatedPhotos = [...photos, photoPreview]
-      updatePhotos(updatedPhotos)
-      
-      console.log(`✅ Foto capturada: ${fileName} (${blob.size} bytes)`)
-      
-    } catch (error) {
-      console.error('❌ Error al capturar foto:', error)
-      alert('Error al capturar la foto: ' + error)
-    } finally {
-      setIsCapturing(false)
-    }
-  }, [photos, updatePhotos, stream])
-
-  // ALTERNATIVA MÁS SIMPLE: Usar data URL directamente para preview
   const capturePhotoSimple = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || !stream) {
       return
@@ -214,13 +134,11 @@ export default function PhotoStep({
 
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
       
-      // SOLUCIÓN SIMPLE: Usar data URL directamente para el preview
       const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
       
       const timestamp = Date.now()
       const fileName = `foto_${timestamp}.jpg`
       
-      // Convertir data URL a blob para el File
       const response = await fetch(dataUrl)
       const blob = await response.blob()
       
@@ -232,15 +150,13 @@ export default function PhotoStep({
       const photoPreview: PhotoPreview = {
         id: `photo_${timestamp}`,
         file,
-        url: dataUrl, // ← USAR DATA URL DIRECTAMENTE PARA EL PREVIEW
+        url: dataUrl,
         timestamp,
         blob
       }
       
       const updatedPhotos = [...photos, photoPreview]
       updatePhotos(updatedPhotos)
-      
-      console.log(`✅ Foto capturada: ${fileName}`)
       
     } catch (error) {
       console.error('Error al capturar foto:', error)
@@ -249,7 +165,6 @@ export default function PhotoStep({
     }
   }, [photos, updatePhotos, stream])
 
-  // Subir fotos desde galería
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
@@ -264,7 +179,7 @@ export default function PhotoStep({
           file,
           url: URL.createObjectURL(file),
           timestamp,
-          blob: file // Para archivos subidos, el file ya es un blob
+          blob: file
         }
         newPhotos.push(photoPreview)
       }
@@ -278,38 +193,56 @@ export default function PhotoStep({
     }
   }, [photos, updatePhotos])
 
-  // Eliminar foto
   const handleRemovePhoto = useCallback((photoId: string) => {
     const photoToRemove = photos.find(p => p.id === photoId)
-    if (photoToRemove) {
-      // Solo revocar URL si no es una data URL
-      if (!photoToRemove.url.startsWith('data:')) {
-        URL.revokeObjectURL(photoToRemove.url)
-      }
+    if (photoToRemove && !photoToRemove.url.startsWith('data:')) {
+      URL.revokeObjectURL(photoToRemove.url)
     }
     
     const updatedPhotos = photos.filter(p => p.id !== photoId)
     updatePhotos(updatedPhotos)
   }, [photos, updatePhotos])
 
-  // Actualizar observaciones
   const handleObservationsChange = useCallback((value: string) => {
     setObservations(value)
     onObservationsChange(value)
   }, [onObservationsChange])
 
-  // Limpiar recursos al desmontar
   useEffect(() => {
     return () => {
       if (stream) {
-        console.log('🧹 Limpiando stream en cleanup...');
         stream.getTracks().forEach(track => {
           track.stop();
         });
       }
-      // No liberar URLs de fotos aquí para mantener las previews
     };
   }, [stream]);
+
+  // 🚀 SI ES ARQUEO SIN TORTUGA, MOSTRAR MENSAJE Y AUTO-SKIP
+  if (eventType === 'arqueo' && !hayTortuga) {
+    return (
+      <div className="animate-fadeInUp">
+        <div className="bg-card rounded-3xl p-8 shadow-xl border border-border/50 text-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-500/20 flex items-center justify-center animate-pulse">
+            <svg className="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
+          
+          <h2 className="text-2xl font-semibold text-foreground mb-3">
+            Arqueo sin Tortuga
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            No se requieren fotos para este tipo de registro. Pasando al siguiente paso...
+          </p>
+          
+          <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+            <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '100%' }}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col animate-fadeInUp">
@@ -322,7 +255,6 @@ export default function PhotoStep({
       {/* Modal de Cámara */}
       {isCameraOpen && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          {/* Header de la cámara */}
           <div className="flex justify-between items-center p-4 bg-black/80 backdrop-blur-sm">
             <div className="text-white font-semibold flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${stream ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
@@ -338,7 +270,6 @@ export default function PhotoStep({
             </button>
           </div>
 
-          {/* Vista de la cámara */}
           <div className="flex-1 relative overflow-hidden bg-black">
             <video
               ref={videoRef}
@@ -349,13 +280,8 @@ export default function PhotoStep({
               style={{ transform: 'scaleX(1)' }}
             />
             
-            {/* Canvas oculto para captura */}
-            <canvas
-              ref={canvasRef}
-              className="hidden"
-            />
+            <canvas ref={canvasRef} className="hidden" />
 
-            {/* Overlay de guía */}
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               {stream && (
                 <div className="w-full h-full border-2 border-white/30 m-auto" 
@@ -363,14 +289,12 @@ export default function PhotoStep({
               )}
             </div>
 
-            {/* Estado de la cámara */}
             {stream && (
               <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
                 {photos.length} {photos.length === 1 ? 'foto' : 'fotos'}
               </div>
             )}
 
-            {/* Miniatura de última foto capturada */}
             {photos.length > 0 && (
               <div className="absolute top-4 left-4 w-16 h-16 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg">
                 <img 
@@ -382,15 +306,12 @@ export default function PhotoStep({
             )}
           </div>
 
-          {/* Controles de la cámara */}
           <div className="p-8 bg-black/80 backdrop-blur-sm">
             <div className="flex justify-center items-center gap-8">
-              {/* Contador de fotos */}
               <div className="text-white text-sm font-medium">
                 {photos.length} capturadas
               </div>
 
-              {/* Botón de captura */}
               <button
                 onClick={capturePhotoSimple}
                 disabled={isCapturing || !stream}
@@ -408,7 +329,6 @@ export default function PhotoStep({
                 )}
               </button>
 
-              {/* Botón de galería */}
               <button
                 onClick={() => {
                   closeCamera()
@@ -424,14 +344,12 @@ export default function PhotoStep({
               </button>
             </div>
 
-            {/* Mensaje de captura */}
             {isCapturing && (
               <div className="text-center text-white mt-4 text-sm">
                 Capturando foto...
               </div>
             )}
 
-            {/* Indicador de éxito después de capturar */}
             {photos.length > 0 && !isCapturing && (
               <div className="text-center text-green-400 mt-4 text-sm flex items-center justify-center gap-2 animate-fadeIn">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -441,7 +359,6 @@ export default function PhotoStep({
               </div>
             )}
 
-            {/* Botón de cerrar cámara */}
             <button
               onClick={closeCamera}
               className="w-full mt-4 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 border border-white/20"
@@ -455,7 +372,6 @@ export default function PhotoStep({
         </div>
       )}
 
-        {/* Sección de fotos */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-semibold text-foreground">
@@ -577,7 +493,6 @@ export default function PhotoStep({
           )}
         </div>
 
-        {/* Sección de observaciones */}
         <div className="mb-8">
           <label className="block text-lg font-semibold text-foreground mb-4">
             Observaciones
@@ -597,7 +512,6 @@ export default function PhotoStep({
           </p>
         </div>
 
-        {/* Botones de navegación */}
         <div className="flex gap-4">
           <button
             onClick={onBack}
