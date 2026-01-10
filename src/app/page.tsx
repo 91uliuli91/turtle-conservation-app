@@ -5,6 +5,7 @@ import Link from "next/link"
 import { PlusCircleIcon, MapIcon, ChartBarIcon, ChevronDownIcon, ChevronUpIcon, } from "@heroicons/react/24/outline"
 import EnvironmentalDataPanel from "@/components/EnvironmentalDataPanel"
 import ProfileMenu from "@/components/ProfileMenu"
+import { pool } from '../../backend/lib/db';
 
 export default function TurtleTrackDashboard() {
   const [showMenu, setShowMenu] = useState(false)
@@ -142,4 +143,4 @@ export default function TurtleTrackDashboard() {
       </nav>
     </div>
   )
-}  
+}

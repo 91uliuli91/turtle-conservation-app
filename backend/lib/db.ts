@@ -1,10 +1,10 @@
-//src/app/lib/db.ts
+//src/app/backend/db.ts
 import { Pool, Client } from 'pg';
 
 // Configuración de conexión a PostgreSQL
 const dbConfig = {
   user: 'misterturtle',
-  host: 'localhost',
+  host: '187.252.198.167',
   database: 'coral_de_datos',
   password: 'aleta',
   port: 5432,
@@ -56,4 +56,4 @@ export const closeConnections = async () => {
 
 // Export default del pool para uso directo
 export default pool;
-(tu versión local)
+
