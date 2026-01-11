@@ -7,7 +7,7 @@ import {
   getAllUsers, 
   getUserById, 
   createUser 
-} from '@/app/lib/db-examples';
+} from '@/../backend/lib/db-examples';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);

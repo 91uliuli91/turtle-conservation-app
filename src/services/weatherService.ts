@@ -69,10 +69,10 @@ class WeatherService {
     try {
       console.log('🌤️ Obteniendo datos de MÚLTIPLES APIs...');
       
-      // Obtener datos de todas las APIs en paralelo
-      const [openWeatherData, weatherApiData, openMeteoData] = await Promise.allSettled([
+      // Obtener datos de todas las APIs en paralelo (WeatherAPI deshabilitada temporalmente)
+      const [openWeatherData, openMeteoData] = await Promise.allSettled([
         this.getOpenWeatherData(lat, lon),
-        this.getWeatherApiData(lat, lon),
+        // this.getWeatherApiData(lat, lon), // ❌ Deshabilitada - API key expirada
         this.getOpenMeteoData(lat, lon)
       ]);
 
@@ -84,10 +84,11 @@ class WeatherService {
         validResults.push(openWeatherData.value);
         sources.push('OpenWeather');
       }
-      if (weatherApiData.status === 'fulfilled') {
-        validResults.push(weatherApiData.value);
-        sources.push('WeatherAPI');
-      }
+      // WeatherAPI deshabilitada temporalmente
+      // if (weatherApiData.status === 'fulfilled') {
+      //   validResults.push(weatherApiData.value);
+      //   sources.push('WeatherAPI');
+      // }
       if (openMeteoData.status === 'fulfilled') {
         validResults.push(openMeteoData.value);
         sources.push('OpenMeteo');

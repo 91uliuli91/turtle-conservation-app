@@ -6,10 +6,10 @@ import { Pool } from 'pg';
 
 // Pool de conexión simple para health check
 const healthCheckPool = new Pool({
-  user: 'misterturtle',
-  host: 'localhost',
+  user: 'orbe',
+  host: '187.252.198.167',
   database: 'coral_de_datos',
-  password: 'aleta',
+  password: 'tortuga1',
   port: 5432,
   max: 1, // Solo una conexión para health check
   idleTimeoutMillis: 5000,

@@ -1,6 +1,6 @@
 // src/app/api/eventos/anidacion/route.ts
 import { NextResponse, NextRequest } from 'next/server';
-import { query } from '@/app/lib/db';
+import { query } from '@/../backend/lib/db';
 
 export const dynamic = 'force-static'; // Para compatibilidad con GitHub Pages
 

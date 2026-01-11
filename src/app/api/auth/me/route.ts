@@ -1,6 +1,6 @@
 // src/app/api/auth/me/route.ts
 import { NextResponse } from 'next/server';
-import { query } from '@/app/lib/db';
+import { query } from '@/../backend/lib/db';
 
 export async function GET(request: Request) {
   try {

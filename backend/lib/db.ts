@@ -3,10 +3,10 @@ import { Pool, Client } from 'pg';
 
 // Configuración de conexión a PostgreSQL
 const dbConfig = {
-  user: 'misterturtle',
+  user: 'orbe',
   host: '187.252.198.167',
   database: 'coral_de_datos',
-  password: 'aleta',
+  password: 'tortuga1',
   port: 5432,
 };
 

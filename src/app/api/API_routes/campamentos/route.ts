@@ -2,7 +2,7 @@ export const dynamic = 'force-static';
 export const revalidate = 0;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/app/lib/db';
+import { query } from '@/../backend/lib/db';
 
 // GET - Obtener todos los campamentos
 export async function GET() {
